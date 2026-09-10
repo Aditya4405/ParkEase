@@ -8,6 +8,7 @@ import PublicLayout from './components/layout/PublicLayout';
 import UserLayout from './components/layout/UserLayout';
 import OwnerLayout from './components/layout/OwnerLayout';
 import AdminLayout from './components/layout/AdminLayout';
+import AdaptiveParkingLayout from './components/layout/AdaptiveParkingLayout';
 
 // Public Pages
 import LandingPage from './pages/public/LandingPage';
@@ -51,11 +52,11 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* ================= PUBLIC MARKETING ROUTES ================= */}
+          {/* ================= PUBLIC MARKETING / ADAPTIVE ROUTES ================= */}
           <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
-          <Route path="/find-parking" element={<PublicLayout><ParkingLotsPage /></PublicLayout>} />
-          <Route path="/parking-lots" element={<PublicLayout><ParkingLotsPage /></PublicLayout>} />
-          <Route path="/parking-lots/:id" element={<PublicLayout><ParkingLotDetailsPage /></PublicLayout>} />
+          <Route path="/find-parking" element={<AdaptiveParkingLayout pageTitle="Find Parking"><ParkingLotsPage /></AdaptiveParkingLayout>} />
+          <Route path="/parking-lots" element={<AdaptiveParkingLayout pageTitle="Find Parking"><ParkingLotsPage /></AdaptiveParkingLayout>} />
+          <Route path="/parking-lots/:id" element={<AdaptiveParkingLayout pageTitle="Parking Details"><ParkingLotDetailsPage /></AdaptiveParkingLayout>} />
           <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
           <Route path="/register" element={<PublicLayout><RegisterPage /></PublicLayout>} />
           <Route path="/register-owner" element={<PublicLayout><OwnerRegisterPage /></PublicLayout>} />
@@ -74,6 +75,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['USER']}>
                 <UserLayout><UserDashboard /></UserLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/find-parking"
+            element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserLayout pageTitle="Find Parking"><ParkingLotsPage /></UserLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/parking/:id"
+            element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserLayout pageTitle="Parking Details"><ParkingLotDetailsPage /></UserLayout>
               </ProtectedRoute>
             }
           />

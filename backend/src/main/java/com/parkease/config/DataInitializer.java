@@ -74,7 +74,7 @@ public class DataInitializer implements CommandLineRunner {
             boolean hasLegacyData = userRepository.findAll().stream()
                     .anyMatch(u -> u.getVehicleNumber() != null && u.getVehicleNumber().startsWith("NY-"));
             boolean lacksCategoryData = parkingLotRepository.findAll().stream()
-                    .anyMatch(p -> p.getCategory() == null || p.getCategory().isBlank());
+                    .anyMatch(p -> p.getCategory() == null || p.getCategory().isBlank() || p.getTotalCapacity() < (p.getOccupiedSlots() + p.getReservedSlots()));
 
             if (hasLegacyData || lacksCategoryData) {
                 log.info("Upgrading database with static/dynamic metadata and category architecture...");

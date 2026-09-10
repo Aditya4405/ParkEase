@@ -105,15 +105,22 @@ public class ParkingLot {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public int getEffectiveTotalCapacity() {
+        if (totalCapacity > 0) {
+            if (slots != null && !slots.isEmpty()) {
+                return Math.max(totalCapacity, slots.size());
+            }
+            return totalCapacity;
+        }
         if (slots != null && !slots.isEmpty()) {
             return slots.size();
         }
-        return totalCapacity > 0 ? totalCapacity : 100;
+        return 100;
     }
 
     public int getComputedAvailableSlots() {
         int capacity = getEffectiveTotalCapacity();
-        int available = capacity - occupiedSlots - reservedSlots;
-        return Math.max(0, available);
+        int safeOccupied = Math.max(0, Math.min(occupiedSlots, capacity));
+        int safeReserved = Math.max(0, Math.min(reservedSlots, capacity - safeOccupied));
+        return Math.max(0, capacity - safeOccupied - safeReserved);
     }
 }

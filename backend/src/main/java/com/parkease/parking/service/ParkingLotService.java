@@ -101,7 +101,9 @@ public class ParkingLotService {
                         .build();
                 lot.getSlots().add(slot);
             }
-            lot.setTotalCapacity(lot.getSlots().size());
+            if (request.getTotalCapacity() == null || request.getTotalCapacity() <= 0) {
+                lot.setTotalCapacity(Math.max(100, lot.getSlots().size()));
+            }
         }
 
         ParkingLot savedLot = parkingLotRepository.save(lot);
