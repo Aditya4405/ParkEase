@@ -39,11 +39,12 @@ function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
+              <Route path="/find-parking" element={<ParkingLotsPage />} />
+              <Route path="/parking-lots" element={<ParkingLotsPage />} />
+              <Route path="/parking-lots/:id" element={<ParkingLotDetailsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/register-owner" element={<OwnerRegisterPage />} />
-              <Route path="/parking-lots" element={<ParkingLotsPage />} />
-              <Route path="/parking-lots/:id" element={<ParkingLotDetailsPage />} />
 
               {/* User Protected Routes */}
               <Route

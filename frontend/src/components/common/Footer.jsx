@@ -1,37 +1,37 @@
 import React from 'react';
-import { Car, ShieldCheck, Clock, MapPin, Heart, Zap, CreditCard, Sparkles } from 'lucide-react';
+import { Car, MapPin, ShieldCheck, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
     <footer style={{
-      background: 'var(--dark-bg)',
-      color: 'var(--dark-text)',
-      padding: '4.5rem 0 2rem',
-      borderTop: '1px solid var(--dark-border)',
+      background: '#0f172a',
+      color: '#94a3b8',
+      padding: '4rem 0 2rem',
+      borderTop: '1px solid #1e293b',
       marginTop: 'auto'
     }}>
       <div className="container">
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '3rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '2.5rem',
           marginBottom: '3rem'
         }}>
           {/* Brand Info */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+          <div style={{ maxWidth: '300px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.8rem' }}>
               <div style={{
                 background: 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
-                width: '38px',
-                height: '38px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ffffff'
               }}>
-                <Car size={22} />
+                <Car size={20} />
               </div>
               <div>
                 <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
@@ -42,71 +42,78 @@ const Footer = () => {
                 </span>
               </div>
             </div>
-            <p style={{ color: 'var(--dark-muted)', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.2rem' }}>
-              India's smart parking discovery & slot reservation network. Connecting drivers to secure parking across Lucknow, Delhi NCR, Kanpur, Ayodhya and major Indian hubs.
+            <p style={{ fontSize: '0.84rem', color: '#64748b', lineHeight: '1.6', marginBottom: '1rem' }}>
+              Smart Parking for India. Connecting commuters and drivers to verified parking facilities near malls, railway stations, hospitals, and high-density destinations.
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.6rem', borderRadius: '4px', color: '#cbd5e1' }}>
-                UPI & Fastag Ready
-              </span>
-              <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.6rem', borderRadius: '4px', color: '#cbd5e1' }}>
-                EV Charging Bays
-              </span>
+            <div style={{ fontSize: '0.76rem', color: '#475569' }}>
+              Built for parking in India 🇮🇳
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Navigation Links */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Explore Hubs</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
-              <li><Link to="/parking-lots?city=Lucknow" style={{ color: 'var(--dark-muted)' }}>Lucknow Parking (Phoenix, Lulu, Charbagh)</Link></li>
-              <li><Link to="/parking-lots?city=Noida" style={{ color: 'var(--dark-muted)' }}>Noida & DLF Mall of India</Link></li>
-              <li><Link to="/parking-lots?city=Delhi" style={{ color: 'var(--dark-muted)' }}>Delhi NCR Transit Parking</Link></li>
-              <li><Link to="/parking-lots?city=Ayodhya" style={{ color: 'var(--dark-muted)' }}>Ayodhya Dham Pilgrim Parking</Link></li>
-              <li><Link to="/register-owner" style={{ color: '#818cf8', fontWeight: 600 }}>+ List Your Commercial Space</Link></li>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Navigation</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
+              <li><Link to="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>Home</Link></li>
+              <li><Link to="/find-parking" style={{ color: '#94a3b8', textDecoration: 'none' }}>Find Parking</Link></li>
+              <li><a href="/#how-it-works" style={{ color: '#94a3b8', textDecoration: 'none' }}>How It Works</a></li>
+              <li><a href="/#services" style={{ color: '#94a3b8', textDecoration: 'none' }}>Services</a></li>
+              <li><a href="/#about" style={{ color: '#94a3b8', textDecoration: 'none' }}>About</a></li>
+              <li><a href="/#contact" style={{ color: '#94a3b8', textDecoration: 'none' }}>Contact</a></li>
             </ul>
           </div>
 
-          {/* Key Advantages */}
+          {/* For Users */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', marginBottom: '1.25rem', fontWeight: 700 }}>India-First Features</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', color: 'var(--dark-muted)', fontSize: '0.88rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <ShieldCheck size={17} style={{ color: '#10b981', flexShrink: 0 }} />
-                <span>Zero Double-Booking Guarantee</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Clock size={17} style={{ color: '#38bdf8', flexShrink: 0 }} />
-                <span>Instant QR Pass & Entry Code</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Zap size={17} style={{ color: '#fbbf24', flexShrink: 0 }} />
-                <span>Dedicated EV Charging Slot Reservations</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <CreditCard size={17} style={{ color: '#a78bfa', flexShrink: 0 }} />
-                <span>Indian Currency (₹) Hourly & Daily Tariffs</span>
-              </div>
-            </div>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>For Commuters</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
+              <li><Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>Login</Link></li>
+              <li><Link to="/register" style={{ color: '#94a3b8', textDecoration: 'none' }}>Register Free</Link></li>
+              <li><Link to="/my-bookings" style={{ color: '#94a3b8', textDecoration: 'none' }}>My Bookings</Link></li>
+              <li><Link to="/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>User Dashboard</Link></li>
+            </ul>
+          </div>
+
+          {/* For Facility Owners */}
+          <div>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>For Facility Owners</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
+              <li><Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>Owner Login</Link></li>
+              <li><Link to="/register-owner" style={{ color: '#94a3b8', textDecoration: 'none' }}>Register as Owner</Link></li>
+              <li><Link to="/owner/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>Occupancy Control Hub</Link></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Legal & Trust</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
+              <li><span style={{ color: '#64748b' }}>Privacy Policy</span></li>
+              <li><span style={{ color: '#64748b' }}>Terms & Conditions</span></li>
+              <li><span style={{ color: '#64748b' }}>OpenStreetMap Sourced</span></li>
+              <li><span style={{ color: '#64748b' }}>Zero Double-Booking</span></li>
+            </ul>
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Bottom Bar */}
         <div style={{
-          borderTop: '1px solid var(--dark-border)',
-          paddingTop: '2rem',
+          borderTop: '1px solid #1e293b',
+          paddingTop: '1.5rem',
           display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
           justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
           gap: '1rem',
-          fontSize: '0.85rem',
-          color: 'var(--dark-muted)'
+          fontSize: '0.82rem',
+          color: '#64748b'
         }}>
-          <p>© {new Date().getFullYear()} ParkEase India Technologies. All rights reserved.</p>
-          <p style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            Built for Smart Cities & Seamless Urban Mobility in India 🇮🇳
-          </p>
+          <div>
+            © 2026 ParkEase. All rights reserved.
+          </div>
+          <div>
+            Smart Parking for India • Lucknow Hub
+          </div>
         </div>
       </div>
     </footer>
