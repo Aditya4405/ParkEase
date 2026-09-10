@@ -28,7 +28,9 @@ import {
   HelpCircle,
   TrendingUp,
   UserCheck,
-  ChevronRight
+  ChevronRight,
+  Compass,
+  Calendar
 } from 'lucide-react';
 import { INDIAN_CITIES } from '../../data/indianDestinations';
 
