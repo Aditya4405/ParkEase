@@ -27,6 +27,4 @@ COPY --from=build /app/target/*.jar app.jar
 
 # Dynamic port binding (Render injects PORT)
 ENV PORT=8080
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${PORT:-8080} -jar app.jar"]

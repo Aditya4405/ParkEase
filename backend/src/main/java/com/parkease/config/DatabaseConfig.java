@@ -34,13 +34,20 @@ public class DatabaseConfig {
         String password = defaultPassword;
 
         try {
-            if (rawUrl.startsWith("postgres://") || rawUrl.startsWith("postgresql://")) {
+            if (rawUrl != null && (rawUrl.startsWith("postgres://") || rawUrl.startsWith("postgresql://"))) {
                 URI uri = new URI(rawUrl);
                 String host = uri.getHost();
                 int port = uri.getPort() == -1 ? 5432 : uri.getPort();
                 String path = uri.getPath();
 
                 jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
+                
+                String query = uri.getQuery();
+                if (query != null && !query.isBlank()) {
+                    jdbcUrl += "?" + query;
+                } else if (!"localhost".equalsIgnoreCase(host) && !"127.0.0.1".equals(host)) {
+                    jdbcUrl += "?sslmode=require";
+                }
 
                 if (uri.getUserInfo() != null) {
                     String[] userInfo = uri.getUserInfo().split(":");
@@ -49,6 +56,8 @@ public class DatabaseConfig {
                         password = userInfo[1];
                     }
                 }
+            } else if (rawUrl != null && !rawUrl.startsWith("jdbc:")) {
+                jdbcUrl = "jdbc:" + rawUrl;
             }
         } catch (Exception e) {
             // Fallback to rawUrl as-is
