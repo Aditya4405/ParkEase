@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { bookingApi } from '../../api/bookingApi';
 import { 
@@ -22,27 +22,29 @@ import Modal from '../common/Modal';
 import ErrorMessage from '../common/ErrorMessage';
 import LoadingSpinner from '../common/LoadingSpinner';
 
-const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess }) => {
+const BookingModal = ({ isOpen, onClose, lot, initialSlot, initialStartTime, initialEndTime, onBookingSuccess }) => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1); // 1: Vehicle, 2: Time, 3: Slot, 4: Summary & Confirm, 5: Ticket
 
-  // Format default times: next hour to next hour + 2 hours
+  // Format default times
   const getDefaultStartTime = () => {
+    if (initialStartTime) return initialStartTime;
     const d = new Date();
     d.setHours(d.getHours() + 1, 0, 0, 0);
     return d.toISOString().slice(0, 16);
   };
 
   const getDefaultEndTime = () => {
+    if (initialEndTime) return initialEndTime;
     const d = new Date();
     d.setHours(d.getHours() + 3, 0, 0, 0);
     return d.toISOString().slice(0, 16);
   };
 
-  const [vehicleType, setVehicleType] = useState(preselectedSlot?.vehicleType || 'CAR');
-  const [selectedSlotId, setSelectedSlotId] = useState(preselectedSlot?.id || null);
+  const [vehicleType, setVehicleType] = useState(initialSlot?.vehicleType || 'CAR');
+  const [selectedSlotId, setSelectedSlotId] = useState(initialSlot?.slotId || initialSlot?.id || null);
   const [startTime, setStartTime] = useState(getDefaultStartTime());
   const [endTime, setEndTime] = useState(getDefaultEndTime());
   const [vehicleNumber, setVehicleNumber] = useState(user?.vehicleNumber || 'UP 32 EA 4455');
@@ -54,12 +56,12 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
   const [createdBooking, setCreatedBooking] = useState(null);
 
   useEffect(() => {
-    if (preselectedSlot) {
-      setSelectedSlotId(preselectedSlot.id);
-      setVehicleType(preselectedSlot.vehicleType);
-      setStep(3); // Jump to slot step if opened directly from a slot
+    if (initialSlot) {
+      setSelectedSlotId(initialSlot.slotId || initialSlot.id);
+      setVehicleType(initialSlot.vehicleType || 'CAR');
+      setStep(3);
     }
-  }, [preselectedSlot]);
+  }, [initialSlot]);
 
   useEffect(() => {
     if (user?.vehicleNumber) {
@@ -166,9 +168,9 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={step === 5 ? 'Booking Confirmed • E-Ticket' : `Reserve Slot at ${lot?.name}`}
+      title={step === 5 ? 'Booking Reserved • Payment Step' : `Reserve Slot at ${lot?.name}`}
     >
-      {/* 5-Step Progress Stepper */}
+      {/* Stepper */}
       {step < 5 && (
         <div className="stepper-nav" style={{ marginBottom: '1.75rem' }}>
           {[
@@ -292,7 +294,6 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
             </div>
           </div>
 
-          {/* Duration Summary Pill */}
           <div
             style={{
               padding: '0.75rem 1rem',
@@ -389,7 +390,6 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
             Verify your reservation details before final confirmation.
           </p>
 
-          {/* Vehicle License Plate Input */}
           <div className="form-group">
             <label className="form-label">Vehicle Registration Plate (India Format)</label>
             <input
@@ -402,7 +402,6 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
             />
           </div>
 
-          {/* Structured Booking Summary Card */}
           <div
             style={{
               background: '#f8fafc',
@@ -466,13 +465,13 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
               <span>Back</span>
             </button>
             <button type="submit" className="btn btn-emerald" disabled={submitting}>
-              {submitting ? <LoadingSpinner text="Confirming Reservation..." /> : 'Confirm & Reserve Slot'}
+              {submitting ? <LoadingSpinner text="Confirming Reservation..." /> : 'Confirm & Proceed to Payment'}
             </button>
           </div>
         </form>
       )}
 
-      {/* STEP 5: Instant E-Ticket Confirmation Slip */}
+      {/* STEP 5: Instant E-Ticket & Payment Button */}
       {step === 5 && (
         <div style={{ textAlign: 'center', padding: '1rem 0' }}>
           <div
@@ -492,13 +491,12 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
           </div>
 
           <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
-            Reservation Confirmed!
+            Reservation Reserved!
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
-            Your parking bay has been reserved. Present this digital slip at the parking gate barrier.
+            Your parking bay has been reserved. Complete payment to confirm your guaranteed slot pass.
           </p>
 
-          {/* Ticket Slip Card */}
           <div
             style={{
               background: '#ffffff',
@@ -516,10 +514,10 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
                   Booking ID
                 </span>
                 <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary)' }}>
-                  #PK-{createdBooking?.id ? String(createdBooking.id).padStart(5, '0') : '00482'}
+                  #PE-BK-{createdBooking?.id ? String(createdBooking.id).padStart(4, '0') : '0048'}
                 </div>
               </div>
-              <span className="badge badge-success">Confirmed</span>
+              <span className="badge badge-warning">Payment Pending</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.86rem', marginBottom: '0.75rem' }}>
@@ -536,21 +534,9 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
                 <strong>{vehicleNumber}</strong>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total Paid/Due</span>
-                <strong style={{ color: '#059669' }}>₹{createdBooking?.totalPrice || calculateTotal()}</strong>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Tariff Amount</span>
+                <strong style={{ color: 'var(--primary)', fontSize: '1rem' }}>₹{createdBooking?.totalPrice || calculateTotal()}</strong>
               </div>
-            </div>
-
-            {/* QR Code Graphic Box */}
-            <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <QrCode size={36} style={{ color: 'var(--text-main)' }} />
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Scan at Gate Barrier</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Fastag & UPI Auto-Checkout</div>
-                </div>
-              </div>
-              <span className="badge badge-neutral" style={{ fontSize: '0.68rem' }}>Fast Access</span>
             </div>
           </div>
 
@@ -559,12 +545,22 @@ const BookingModal = ({ isOpen, onClose, lot, preselectedSlot, onBookingSuccess 
               type="button"
               onClick={() => {
                 onClose();
-                navigate('/my-bookings');
+                navigate(`/payment/${createdBooking?.id}`);
               }}
               className="btn btn-primary"
             >
+              <CreditCard size={16} />
+              <span>Proceed to Pay (₹{createdBooking?.totalPrice || calculateTotal()})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                navigate('/my-bookings');
+              }}
+              className="btn btn-secondary"
+            >
               <span>View in My Bookings</span>
-              <ArrowRight size={16} />
             </button>
           </div>
         </div>

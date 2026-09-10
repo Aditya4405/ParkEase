@@ -1,5 +1,6 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, Car, XCircle, CheckCircle, QrCode } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Calendar, Clock, MapPin, Car, XCircle, CheckCircle, Receipt, CreditCard } from 'lucide-react';
 
 const BookingCard = ({ booking, onCancel, cancellingId }) => {
   const isCancellable = booking.status === 'RESERVED' || booking.status === 'ACTIVE';
@@ -20,6 +21,7 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
   const getStatusPill = (status) => {
     switch (status) {
       case 'RESERVED':
+      case 'CONFIRMED':
         return (
           <span className="status-pill available" style={{ fontSize: '0.72rem' }}>
             <span className="status-indicator-dot" /> Confirmed
@@ -56,7 +58,7 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
         flexDirection: 'column',
         justifyContent: 'space-between',
         borderLeft: `5px solid ${
-          booking.status === 'RESERVED' ? '#4f46e5' :
+          booking.status === 'RESERVED' || booking.status === 'CONFIRMED' ? '#4f46e5' :
           booking.status === 'ACTIVE' ? '#10b981' :
           booking.status === 'COMPLETED' ? '#94a3b8' : '#ef4444'
         }`,
@@ -67,7 +69,7 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <div>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Pass #PK-{String(booking.id).padStart(5, '0')}
+              Pass #PE-BK-{String(booking.id).padStart(4, '0')}
             </span>
             <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '2px' }}>
               {booking.parkingLotName}
@@ -130,12 +132,14 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
         </div>
       </div>
 
-      {/* Footer: Price in ₹ & Cancel Action */}
+      {/* Footer: Price in ₹ & Actions */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
           paddingTop: '0.85rem',
           borderTop: '1px solid var(--border)',
           marginTop: '0.5rem',
@@ -150,16 +154,23 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
           </span>
         </div>
 
-        {isCancellable && onCancel && (
-          <button
-            onClick={() => onCancel(booking.id)}
-            disabled={cancellingId === booking.id}
-            className="btn btn-danger-outline btn-sm"
-          >
-            <XCircle size={14} />
-            {cancellingId === booking.id ? 'Cancelling...' : 'Cancel Reservation'}
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <Link to={`/bookings/${booking.id}`} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Receipt size={13} />
+            <span>Pass</span>
+          </Link>
+
+          {isCancellable && onCancel && (
+            <button
+              onClick={() => onCancel(booking.id)}
+              disabled={cancellingId === booking.id}
+              className="btn btn-danger-outline btn-sm"
+            >
+              <XCircle size={13} />
+              {cancellingId === booking.id ? '...' : 'Cancel'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

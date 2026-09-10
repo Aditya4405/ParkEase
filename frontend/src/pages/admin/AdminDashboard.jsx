@@ -1,277 +1,225 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { userApi } from '../../api/userApi';
-import { parkingApi } from '../../api/parkingApi';
-import { bookingApi } from '../../api/bookingApi';
-import SkeletonLoader, { TableSkeleton } from '../../components/common/SkeletonLoader';
-import EmptyState from '../../components/common/EmptyState';
+import { adminApi } from '../../api/adminApi';
+import SkeletonLoader from '../../components/common/SkeletonLoader';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import { 
   ShieldCheck, 
   Users, 
   Building2, 
-  Layers, 
-  DollarSign, 
+  Grid3X3, 
+  CreditCard, 
   Calendar, 
   ArrowRight,
   UserCheck,
+  TrendingUp,
   Activity,
-  CreditCard,
-  Car
+  Layers,
+  Car,
+  RefreshCw
 } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
-  const [lots, setLots] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const [statsRes, lotsRes, bookingsRes, usersRes] = await Promise.all([
-          userApi.getSystemStats(),
-          parkingApi.searchParkingLots(),
-          bookingApi.getAllBookings(),
-          userApi.getAllUsers()
-        ]);
-        setStats(statsRes.data);
-        setLots(lotsRes.data);
-        setBookings(bookingsRes.data);
-        setUsers(usersRes.data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAdminData();
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [statsRes, bookingsRes, usersRes] = await Promise.all([
+        adminApi.getDashboardStats(),
+        adminApi.getBookings(),
+        adminApi.getUsers()
+      ]);
+      setStats(statsRes.data);
+      setRecentBookings(bookingsRes.data ? bookingsRes.data.slice(0, 6) : []);
+      setRecentUsers(usersRes.data ? usersRes.data.slice(0, 6) : []);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <SkeletonLoader count={4} />;
 
-  const totalSlots = lots.reduce((acc, lot) => acc + (lot.totalSlots || 0), 0);
-  const totalRevenue = bookings
-    .filter(b => b.status !== 'CANCELLED')
-    .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
-
   return (
-    <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '3rem' }}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
-            <span className="badge badge-danger" style={{ fontSize: '0.72rem' }}>
-              🇮🇳 Master System Administration
+            <span style={{ background: '#fee2e2', color: '#991b1b', padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 800 }}>
+              ROOT CONTROL TOWER
             </span>
           </div>
-          <h1 className="page-title">
-            ParkEase India Command Center
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+            Master Administration Dashboard
           </h1>
-          <p className="page-subtitle">Platform-wide health, user directories, facility management, and Indian booking oversight.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.25rem' }}>
+            Real-time platform overview, user and facility metrics, and booking logs.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Link to="/admin/users" className="btn btn-primary">
-            <Users size={16} />
-            <span>Manage All Users</span>
-          </Link>
-        </div>
+
+        <button onClick={fetchDashboardData} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <RefreshCw size={14} />
+          <span>Refresh</span>
+        </button>
       </div>
 
       <ErrorMessage error={error} onDismiss={() => setError(null)} />
 
-      {/* System Metric Cards in INR */}
-      <div className="grid-4" style={{ marginBottom: '2.5rem' }}>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'var(--primary-light)',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Users size={24} />
+      {/* Metrics Row 1 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4f46e5' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Registered Drivers</span>
+            <Users size={20} color="#4f46e5" />
           </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Registered Drivers
-            </span>
-            <h3 style={{ fontSize: '1.65rem', fontWeight: 800 }}>{stats?.totalUsers || 0}</h3>
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>
+            {stats?.totalUsers || 0}
           </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: '#e0f2fe',
-            color: '#0284c7',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Building2 size={24} />
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Facility Operators
-            </span>
-            <h3 style={{ fontSize: '1.65rem', fontWeight: 800 }}>{stats?.totalOwners || 0}</h3>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: '#ecfdf5',
-            color: '#059669',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Layers size={24} />
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Active Parking Bays
-            </span>
-            <h3 style={{ fontSize: '1.65rem', fontWeight: 800 }}>{totalSlots}</h3>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: '#fef3c7',
-            color: '#d97706',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <CreditCard size={24} />
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Platform Volume (₹)
-            </span>
-            <h3 style={{ fontSize: '1.65rem', fontWeight: 800 }}>₹{totalRevenue.toFixed(0)}</h3>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Registrations Table */}
-      <div style={{ marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontSize: '1.45rem', fontWeight: 800 }}>System Accounts Directory</h2>
-          <Link to="/admin/users" style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span>Full User Management ({users.length})</span>
-            <ArrowRight size={15} />
+          <Link to="/admin/users" style={{ fontSize: '0.78rem', color: '#4f46e5', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
+            <span>Manage accounts</span> <ArrowRight size={12} />
           </Link>
         </div>
 
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>User ID</th>
-                <th>Full Name</th>
-                <th>Email Address</th>
-                <th>Role</th>
-                <th>Phone (India)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.slice(0, 6).map((u) => (
-                <tr key={u.id}>
-                  <td><strong>#USR-{u.id}</strong></td>
-                  <td><strong>{u.name}</strong></td>
-                  <td>{u.email}</td>
-                  <td>
-                    <span className={`badge ${u.role === 'ADMIN' ? 'badge-danger' : u.role === 'OWNER' ? 'badge-warning' : 'badge-primary'}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td>{u.phone || '+91 98765 43210'}</td>
-                  <td>
-                    <span className={`badge ${u.active ? 'badge-success' : 'badge-neutral'}`}>
-                      {u.active ? 'Active' : 'Disabled'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #0284c7' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Facility Partners</span>
+            <Building2 size={20} color="#0284c7" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>
+            {stats?.totalOwners || 0}
+          </div>
+          <Link to="/admin/owners" style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
+            <span>Manage operators</span> <ArrowRight size={12} />
+          </Link>
+        </div>
+
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #10b981' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Parking Locations</span>
+            <Layers size={20} color="#10b981" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>
+            {stats?.totalParkingLots || 0}
+          </div>
+          <Link to="/admin/parking" style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
+            <span>View facilities</span> <ArrowRight size={12} />
+          </Link>
+        </div>
+
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #f59e0b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Total Revenue</span>
+            <CreditCard size={20} color="#f59e0b" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>
+            ₹{stats?.totalRevenue ? Number(stats.totalRevenue).toLocaleString('en-IN') : '0'}
+          </div>
+          <Link to="/admin/payments" style={{ fontSize: '0.78rem', color: '#d97706', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
+            <span>Audit transactions</span> <ArrowRight size={12} />
+          </Link>
         </div>
       </div>
 
-      {/* System Bookings Overview */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontSize: '1.45rem', fontWeight: 800 }}>Recent Platform Reservations</h2>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Total {bookings.length} reservations across Indian cities
-          </span>
+      {/* Metrics Row 2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+        <div className="card" style={{ padding: '1.25rem', background: '#f8fafc' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Total Parking Bays</span>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+            {stats?.totalSlots || 0} Slots
+          </div>
         </div>
 
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Booking Pass</th>
-                <th>Driver</th>
-                <th>Facility & Bay</th>
-                <th>Vehicle Plate</th>
-                <th>Schedule</th>
-                <th>Tariff (₹)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.slice(0, 5).map((b) => (
-                <tr key={b.id}>
-                  <td><strong>#PK-{String(b.id).padStart(5, '0')}</strong></td>
-                  <td>
-                    <div>{b.userName}</div>
-                    <small style={{ color: 'var(--text-muted)' }}>{b.userEmail}</small>
-                  </td>
-                  <td>
-                    <div>{b.parkingLotName}</div>
-                    <small style={{ color: 'var(--primary)', fontWeight: 700 }}>Slot: {b.slotNumber}</small>
-                  </td>
-                  <td>
-                    <span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>
-                      <Car size={13} /> {b.vehicleNumber || 'UP 32 EA 4455'}
-                    </span>
-                  </td>
-                  <td>
-                    <small style={{ display: 'block' }}>{new Date(b.startTime).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</small>
-                    <small style={{ color: 'var(--text-muted)' }}>to {new Date(b.endTime).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</small>
-                  </td>
-                  <td><strong style={{ color: 'var(--primary)' }}>₹{b.totalPrice ? Number(b.totalPrice).toFixed(0) : '0'}</strong></td>
-                  <td>
-                    <span className={`badge ${
-                      b.status === 'RESERVED' ? 'badge-primary' :
-                      b.status === 'ACTIVE' ? 'badge-success' :
-                      b.status === 'COMPLETED' ? 'badge-neutral' : 'badge-danger'
-                    }`}>
-                      {b.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="card" style={{ padding: '1.25rem', background: '#f8fafc' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Available Bays Now</span>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#16a34a', marginTop: '0.2rem' }}>
+            {stats?.availableSlots || 0} Free
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '1.25rem', background: '#f8fafc' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Total Bookings</span>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+            {stats?.totalBookings || 0} Reservations
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '1.25rem', background: '#f8fafc' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Paid Transactions</span>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0284c7', marginTop: '0.2rem' }}>
+            {stats?.successfulPayments || 0} Settled
+          </div>
+        </div>
+      </div>
+
+      {/* Grid: Recent Bookings & Registered Accounts */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        {/* Recent Reservations */}
+        <div className="card" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+              Recent Reservations
+            </h3>
+            <Link to="/admin/bookings" style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary)' }}>
+              View All →
+            </Link>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {recentBookings.map((b) => (
+              <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>{b.userName}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{b.parkingLotName} • Slot {b.slotNumber}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.9rem' }}>₹{b.totalPrice}</div>
+                  <span className={`badge ${b.status === 'RESERVED' ? 'badge-primary' : b.status === 'ACTIVE' ? 'badge-success' : 'badge-neutral'}`} style={{ fontSize: '0.68rem' }}>
+                    {b.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Registered Accounts */}
+        <div className="card" style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+              Newly Registered Users
+            </h3>
+            <Link to="/admin/users" style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary)' }}>
+              View All →
+            </Link>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {recentUsers.map((u) => (
+              <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>{u.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
+                </div>
+                <div>
+                  <span className={`badge ${u.role === 'ADMIN' ? 'badge-danger' : u.role === 'OWNER' ? 'badge-warning' : 'badge-primary'}`}>
+                    {u.role}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

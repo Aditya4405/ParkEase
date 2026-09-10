@@ -45,19 +45,20 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // Owner specific endpoints (before generic /parking-lots pattern)
-                        .requestMatchers("/api/v1/parking-lots/owner/**").hasRole("OWNER")
-                        .requestMatchers("/api/v1/bookings/owner/**").hasRole("OWNER")
+                        // Owner specific endpoints
+                        .requestMatchers("/api/v1/owner/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/v1/parking-lots/owner/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/v1/bookings/owner/**").hasAnyRole("OWNER", "ADMIN")
+
+                        // Admin only endpoints
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/bookings/all").hasRole("ADMIN")
 
                         // Public read access to parking lots and slot availability
                         .requestMatchers(HttpMethod.GET, "/api/v1/parking-lots", "/api/v1/parking-lots/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/parking-slots/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*/available-slots").permitAll()
-
-                        // Admin only endpoints
-                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/bookings/all").hasRole("ADMIN")
 
                         // Owner & Admin write endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/parking-lots/**").hasAnyRole("OWNER", "ADMIN")
@@ -65,9 +66,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/parking-lots/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/v1/parking-slots/**").hasAnyRole("OWNER", "ADMIN")
 
-                        // Authenticated user endpoints
+                        // Authenticated user/commuter endpoints
+                        .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/profile/**").authenticated()
                         .requestMatchers("/api/v1/bookings/**").authenticated()
+                        .requestMatchers("/api/v1/payments/**").authenticated()
 
                         // Any other request must be authenticated
                         .anyRequest().authenticated()

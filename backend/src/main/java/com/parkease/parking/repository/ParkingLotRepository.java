@@ -29,4 +29,5 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
     );
 
     long countByOwner(User owner);
+    long countByActiveTrue();
 }

@@ -6,6 +6,9 @@ import com.parkease.booking.repository.BookingRepository;
 import com.parkease.parking.entity.*;
 import com.parkease.parking.repository.ParkingLotRepository;
 import com.parkease.parking.repository.ParkingOccupancyEventRepository;
+import com.parkease.parking.repository.ParkingSlotRepository;
+import com.parkease.payment.entity.Payment;
+import com.parkease.payment.repository.PaymentRepository;
 import com.parkease.user.entity.Role;
 import com.parkease.user.entity.User;
 import com.parkease.user.repository.UserRepository;
@@ -26,8 +29,10 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final ParkingLotRepository parkingLotRepository;
+    private final ParkingSlotRepository parkingSlotRepository;
     private final BookingRepository bookingRepository;
     private final ParkingOccupancyEventRepository occupancyEventRepository;
+    private final com.parkease.payment.repository.PaymentRepository paymentRepository;
     private final PasswordEncoder passwordEncoder;
     private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
@@ -73,6 +78,7 @@ public class DataInitializer implements CommandLineRunner {
 
             if (hasLegacyData || lacksCategoryData) {
                 log.info("Upgrading database with static/dynamic metadata and category architecture...");
+                paymentRepository.deleteAll();
                 bookingRepository.deleteAll();
                 occupancyEventRepository.deleteAll();
                 parkingLotRepository.deleteAll();
@@ -83,6 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                 return;
             }
         } else {
+            paymentRepository.deleteAll();
             bookingRepository.deleteAll();
             occupancyEventRepository.deleteAll();
             parkingLotRepository.deleteAll();
@@ -611,7 +618,40 @@ public class DataInitializer implements CommandLineRunner {
 
         bookingRepository.saveAll(List.of(b1, b2, b3));
 
-        log.info("ParkEase Indian dataset initialized successfully with 11 prime parking lots, OSM metadata, telemetry events, and active demo bookings!");
+        // 5. Seed Demo Payments
+        Payment p1 = Payment.builder()
+                .booking(b1)
+                .amount(b1.getTotalPrice())
+                .paymentMethod(com.parkease.payment.entity.PaymentMethod.UPI)
+                .transactionId("TXN-DEMO-UPI-001")
+                .status(com.parkease.payment.entity.PaymentStatus.SUCCESS)
+                .gatewayResponse("Approved: Demo Instant UPI Confirmation")
+                .createdAt(b1.getCreatedAt())
+                .build();
+
+        Payment p2 = Payment.builder()
+                .booking(b2)
+                .amount(b2.getTotalPrice())
+                .paymentMethod(com.parkease.payment.entity.PaymentMethod.CREDIT_DEBIT_CARD)
+                .transactionId("TXN-DEMO-CARD-002")
+                .status(com.parkease.payment.entity.PaymentStatus.SUCCESS)
+                .gatewayResponse("Approved: Demo Card Payment")
+                .createdAt(b2.getCreatedAt())
+                .build();
+
+        Payment p3 = Payment.builder()
+                .booking(b3)
+                .amount(b3.getTotalPrice())
+                .paymentMethod(com.parkease.payment.entity.PaymentMethod.UPI)
+                .transactionId("TXN-DEMO-UPI-003")
+                .status(com.parkease.payment.entity.PaymentStatus.SUCCESS)
+                .gatewayResponse("Approved: Completed Session Payment")
+                .createdAt(b3.getCreatedAt())
+                .build();
+
+        paymentRepository.saveAll(List.of(p1, p2, p3));
+
+        log.info("ParkEase Indian dataset initialized successfully with 11 prime parking lots, OSM metadata, telemetry events, active bookings, and payments!");
     }
 
     private void addSlots(ParkingLot lot, List<ParkingSlot> slotList) {

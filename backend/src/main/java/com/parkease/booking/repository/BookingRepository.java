@@ -16,7 +16,12 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    List<Booking> findByUser(User user);
+
     List<Booking> findByUserOrderByCreatedAtDesc(User user);
+
+    @Query("SELECT b FROM Booking b WHERE b.parkingSlot.parkingLot.owner = :owner ORDER BY b.createdAt DESC")
+    List<Booking> findByParkingLotOwner(@Param("owner") User owner);
 
     List<Booking> findByParkingSlot_ParkingLot_OwnerOrderByCreatedAtDesc(User owner);
 
