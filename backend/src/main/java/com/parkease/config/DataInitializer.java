@@ -34,10 +34,34 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
+            // Drop legacy constraints if present
             jdbcTemplate.execute("ALTER TABLE parking_slots DROP CONSTRAINT IF EXISTS parking_slots_vehicle_type_check");
-            log.info("Dropped legacy parking_slots_vehicle_type_check constraint if present.");
+            
+            // Ensure all columns exist in parking_lots
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS state VARCHAR(255) DEFAULT 'Uttar Pradesh'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS parking_type VARCHAR(50) DEFAULT 'Multi-Level Covered'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS total_capacity INT DEFAULT 100");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS occupied_slots INT DEFAULT 0");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS reserved_slots INT DEFAULT 0");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS opening_time VARCHAR(30) DEFAULT '08:00 AM'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS closing_time VARCHAR(30) DEFAULT '11:00 PM'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS has_ev_charging BOOLEAN DEFAULT TRUE");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'MALL'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS nearby_destination VARCHAR(150)");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS data_source VARCHAR(50) DEFAULT 'OPENSTREETMAP'");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS external_source_id VARCHAR(100)");
+            jdbcTemplate.execute("ALTER TABLE parking_lots ADD COLUMN IF NOT EXISTS last_occupancy_update TIMESTAMP");
+            
+            // Ensure all columns exist in users
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(255)");
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS vehicle_number VARCHAR(255)");
+            
+            // Ensure all columns exist in parking_slots
+            jdbcTemplate.execute("ALTER TABLE parking_slots ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT TRUE");
+            
+            log.info("Database schema columns verified and synchronized safely.");
         } catch (Exception e) {
-            log.debug("Constraint drop skipped: {}", e.getMessage());
+            log.warn("Database schema pre-flight check notice: {}", e.getMessage());
         }
 
         boolean shouldReseed = false;

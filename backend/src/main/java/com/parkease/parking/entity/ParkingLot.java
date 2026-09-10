@@ -23,72 +23,73 @@ public class ParkingLot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(nullable = false)
+    @Column(name = "city", nullable = false)
     private String city;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "state", nullable = false)
     private String state = "Uttar Pradesh";
 
-    @Column(nullable = false)
+    @Column(name = "pincode", nullable = false)
     private String pincode;
 
     @Builder.Default
-    @Column(length = 50)
+    @Column(name = "parking_type", length = 50)
     private String parkingType = "Multi-Level Covered";
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "total_capacity", nullable = false)
     private int totalCapacity = 100;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "occupied_slots", nullable = false)
     private int occupiedSlots = 0;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "reserved_slots", nullable = false)
     private int reservedSlots = 0;
 
     @Builder.Default
-    @Column(length = 30)
+    @Column(name = "opening_time", length = 30)
     private String openingTime = "08:00 AM";
 
     @Builder.Default
-    @Column(length = 30)
+    @Column(name = "closing_time", length = 30)
     private String closingTime = "11:00 PM";
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "has_ev_charging", nullable = false)
     private boolean hasEVCharging = true;
 
     @Builder.Default
-    @Column(length = 50)
+    @Column(name = "category", length = 50)
     private String category = "MALL";
 
-    @Column(length = 150)
+    @Column(name = "nearby_destination", length = 150)
     private String nearbyDestination;
 
     @Builder.Default
-    @Column(length = 50)
+    @Column(name = "data_source", length = 50)
     private String dataSource = "OPENSTREETMAP";
 
-    @Column(length = 100)
+    @Column(name = "external_source_id", length = 100)
     private String externalSourceId;
 
     @Builder.Default
-    @Column
+    @Column(name = "last_occupancy_update")
     private LocalDateTime lastOccupancyUpdate = LocalDateTime.now();
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "active", nullable = false)
     private boolean active = true;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -18,27 +18,28 @@ public class ParkingOccupancyEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "parking_lot_id", nullable = false)
     private Long parkingLotId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "event_type", nullable = false, length = 20)
     private OccupancyEventType eventType;
 
-    @Column(length = 50)
+    @Column(name = "vehicle_number", length = 50)
     private String vehicleNumber;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @Builder.Default
-    @Column(length = 50)
+    @Column(name = "source", length = 50)
     private String source = "DEMO_OPERATOR";
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "processed", nullable = false)
     private boolean processed = true;
 }

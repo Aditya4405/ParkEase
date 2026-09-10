@@ -19,16 +19,17 @@ public class ParkingSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "slot_number", nullable = false)
     private String slotNumber;
 
-    @Column(nullable = false)
+    @Column(name = "price", nullable = false)
     private Double price;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "size", nullable = false)
     private SlotSize size;
 
     @Enumerated(EnumType.STRING)
@@ -36,7 +37,7 @@ public class ParkingSlot {
     private VehicleType vehicleType;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "active", nullable = false)
     private boolean active = true;
 
     @Builder.Default

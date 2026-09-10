@@ -1,5 +1,5 @@
 import React from 'react';
-import { Car, MapPin, ShieldCheck, Heart } from 'lucide-react';
+import { Car } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -11,7 +11,7 @@ const Footer = () => {
       borderTop: '1px solid #1e293b',
       marginTop: 'auto'
     }}>
-      <div className="container">
+      <div className="container" style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 1rem' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -33,29 +33,23 @@ const Footer = () => {
               }}>
                 <Car size={20} />
               </div>
-              <div>
-                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
-                  Park<span style={{ color: '#818cf8' }}>Ease</span>
-                </span>
-                <span style={{ fontSize: '0.65rem', color: '#38bdf8', fontWeight: 700, marginLeft: '6px' }}>
-                  INDIA
-                </span>
-              </div>
+              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+                Park<span style={{ color: '#818cf8' }}>Ease</span>
+              </span>
             </div>
-            <p style={{ fontSize: '0.84rem', color: '#64748b', lineHeight: '1.6', marginBottom: '1rem' }}>
-              Smart Parking for India. Connecting commuters and drivers to verified parking facilities near malls, railway stations, hospitals, and high-density destinations.
+            <p style={{ fontSize: '0.86rem', color: '#64748b', lineHeight: '1.6', marginBottom: '0.8rem' }}>
+              Smart Parking. Better Journeys.
             </p>
-            <div style={{ fontSize: '0.76rem', color: '#475569' }}>
-              Built for parking in India 🇮🇳
-            </div>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: '1.5' }}>
+              Connecting drivers to convenient parking and empowering facility operators with modern digital management.
+            </p>
           </div>
 
-          {/* Quick Navigation Links */}
+          {/* Navigation Links */}
           <div>
             <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Navigation</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
               <li><Link to="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>Home</Link></li>
-              <li><Link to="/find-parking" style={{ color: '#94a3b8', textDecoration: 'none' }}>Find Parking</Link></li>
               <li><a href="/#how-it-works" style={{ color: '#94a3b8', textDecoration: 'none' }}>How It Works</a></li>
               <li><a href="/#services" style={{ color: '#94a3b8', textDecoration: 'none' }}>Services</a></li>
               <li><a href="/#about" style={{ color: '#94a3b8', textDecoration: 'none' }}>About</a></li>
@@ -63,35 +57,34 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* For Users */}
+          {/* Account */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>For Commuters</h4>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Account</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
-              <li><Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>Login</Link></li>
+              <li><Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>Log In</Link></li>
               <li><Link to="/register" style={{ color: '#94a3b8', textDecoration: 'none' }}>Register Free</Link></li>
               <li><Link to="/my-bookings" style={{ color: '#94a3b8', textDecoration: 'none' }}>My Bookings</Link></li>
               <li><Link to="/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>User Dashboard</Link></li>
             </ul>
           </div>
 
-          {/* For Facility Owners */}
+          {/* For Partners */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>For Facility Owners</h4>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>For Partners</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
               <li><Link to="/login" style={{ color: '#94a3b8', textDecoration: 'none' }}>Owner Login</Link></li>
-              <li><Link to="/register-owner" style={{ color: '#94a3b8', textDecoration: 'none' }}>Register as Owner</Link></li>
-              <li><Link to="/owner/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>Occupancy Control Hub</Link></li>
+              <li><Link to="/register-owner" style={{ color: '#94a3b8', textDecoration: 'none' }}>Become a Parking Partner</Link></li>
+              <li><Link to="/owner/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>Operator Control Hub</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Legal & Trust</h4>
+            <h4 style={{ color: '#ffffff', fontSize: '0.92rem', marginBottom: '1rem', fontWeight: 700 }}>Legal</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
               <li><span style={{ color: '#64748b' }}>Privacy Policy</span></li>
               <li><span style={{ color: '#64748b' }}>Terms & Conditions</span></li>
-              <li><span style={{ color: '#64748b' }}>OpenStreetMap Sourced</span></li>
-              <li><span style={{ color: '#64748b' }}>Zero Double-Booking</span></li>
+              <li><span style={{ color: '#64748b' }}>Security & Compliance</span></li>
             </ul>
           </div>
         </div>
@@ -112,7 +105,7 @@ const Footer = () => {
             © 2026 ParkEase. All rights reserved.
           </div>
           <div>
-            Smart Parking for India • Lucknow Hub
+            Smart Parking. Better Journeys.
           </div>
         </div>
       </div>

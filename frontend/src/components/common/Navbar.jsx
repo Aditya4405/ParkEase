@@ -5,31 +5,16 @@ import {
   Car, 
   User, 
   LogOut, 
-  LayoutDashboard, 
-  MapPin, 
-  Calendar, 
-  Building, 
-  PlusCircle, 
-  ShieldCheck, 
-  Users, 
   Menu, 
   X,
-  Compass,
-  ChevronDown,
-  Sparkles,
-  Info,
-  Wrench,
-  HelpCircle
+  Sparkles
 } from 'lucide-react';
-import { INDIAN_CITIES } from '../../data/indianDestinations';
 
 const Navbar = () => {
   const { user, isAuthenticated, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeCity, setActiveCity] = useState('Lucknow');
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -95,26 +80,15 @@ const Navbar = () => {
                 <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-main)' }}>
                   Park<span style={{ color: 'var(--primary)' }}>Ease</span>
                 </span>
-                <span style={{
-                  fontSize: '0.62rem',
-                  fontWeight: 700,
-                  background: '#fef3c7',
-                  color: '#92400e',
-                  padding: '0.1rem 0.35rem',
-                  borderRadius: '4px',
-                  border: '1px solid #fde68a'
-                }}>
-                  INDIA 🇮🇳
-                </span>
               </div>
               <span style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.01em', marginTop: '-2px' }}>
-                Smart Parking for India
+                Smart Parking. Better Journeys.
               </span>
             </div>
           </Link>
         </div>
 
-        {/* Center: Desktop Navigation Links */}
+        {/* Center: Navigation Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} className="desktop-nav">
           <Link 
             to="/" 
@@ -129,25 +103,6 @@ const Navbar = () => {
             }}
           >
             Home
-          </Link>
-
-          <Link 
-            to="/find-parking" 
-            style={{
-              fontWeight: 600,
-              fontSize: '0.88rem',
-              color: (isActive('/find-parking') || isActive('/parking-lots')) ? 'var(--primary)' : '#334155',
-              padding: '0.45rem 0.75rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              background: (isActive('/find-parking') || isActive('/parking-lots')) ? 'var(--primary-subtle)' : 'transparent',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}
-          >
-            <Compass size={15} />
-            <span>Find Parking</span>
           </Link>
 
           <button
@@ -214,7 +169,7 @@ const Navbar = () => {
             Contact
           </button>
 
-          {/* User Specific Links */}
+          {/* User Specific Links if Authenticated */}
           {isAuthenticated && role === 'USER' && (
             <>
               <Link 
@@ -249,119 +204,42 @@ const Navbar = () => {
           )}
 
           {isAuthenticated && role === 'OWNER' && (
-            <>
-              <Link 
-                to="/owner/dashboard" 
-                style={{
-                  fontWeight: 600,
-                  fontSize: '0.88rem',
-                  color: isActive('/owner/dashboard') ? 'var(--primary)' : '#334155',
-                  padding: '0.45rem 0.75rem',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  background: isActive('/owner/dashboard') ? 'var(--primary-subtle)' : 'transparent'
-                }}
-              >
-                Operator Hub
-              </Link>
-            </>
+            <Link 
+              to="/owner/dashboard" 
+              style={{
+                fontWeight: 600,
+                fontSize: '0.88rem',
+                color: isActive('/owner/dashboard') ? 'var(--primary)' : '#334155',
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                background: isActive('/owner/dashboard') ? 'var(--primary-subtle)' : 'transparent'
+              }}
+            >
+              Operator Hub
+            </Link>
           )}
 
           {isAuthenticated && role === 'ADMIN' && (
-            <>
-              <Link 
-                to="/admin/dashboard" 
-                style={{
-                  fontWeight: 600,
-                  fontSize: '0.88rem',
-                  color: isActive('/admin/dashboard') ? 'var(--primary)' : '#334155',
-                  padding: '0.45rem 0.75rem',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  background: isActive('/admin/dashboard') ? 'var(--primary-subtle)' : 'transparent'
-                }}
-              >
-                Admin Center
-              </Link>
-            </>
+            <Link 
+              to="/admin/dashboard" 
+              style={{
+                fontWeight: 600,
+                fontSize: '0.88rem',
+                color: isActive('/admin/dashboard') ? 'var(--primary)' : '#334155',
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                background: isActive('/admin/dashboard') ? 'var(--primary-subtle)' : 'transparent'
+              }}
+            >
+              Admin Center
+            </Link>
           )}
         </div>
 
-        {/* Right: Location Selector + Auth Actions */}
+        {/* Right: Auth Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="desktop-nav">
-          
-          {/* Quick City Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowCityDropdown(!showCityDropdown)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.35rem 0.7rem',
-                borderRadius: '999px',
-                background: '#f8fafc',
-                border: '1px solid var(--border)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'var(--text-main)',
-                cursor: 'pointer'
-              }}
-            >
-              <MapPin size={13} style={{ color: 'var(--primary)' }} />
-              <span>{activeCity}</span>
-              <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
-            </button>
-
-            {showCityDropdown && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '115%',
-                  right: 0,
-                  width: '180px',
-                  background: '#ffffff',
-                  border: '1px solid var(--border)',
-                  borderRadius: '12px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                  padding: '0.4rem 0',
-                  zIndex: 110,
-                }}
-              >
-                <div style={{ padding: '0.3rem 0.8rem', fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Select Hub / Metro
-                </div>
-                {INDIAN_CITIES.map((c) => (
-                  <div
-                    key={c.name}
-                    onClick={() => {
-                      setActiveCity(c.name);
-                      setShowCityDropdown(false);
-                      navigate(`/find-parking?city=${encodeURIComponent(c.name)}`);
-                    }}
-                    style={{
-                      padding: '0.4rem 0.8rem',
-                      fontSize: '0.8rem',
-                      fontWeight: activeCity === c.name ? 700 : 500,
-                      color: activeCity === c.name ? 'var(--primary)' : 'var(--text-main)',
-                      background: activeCity === c.name ? 'var(--primary-subtle)' : 'transparent',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span>{c.name}</span>
-                    {c.hub && (
-                      <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 700 }}>Hub</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Auth Action Buttons */}
           {!isAuthenticated ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Link 
@@ -424,6 +302,7 @@ const Navbar = () => {
             cursor: 'pointer',
             padding: '0.4rem',
           }}
+          aria-label="Toggle Navigation Menu"
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -447,13 +326,6 @@ const Navbar = () => {
             style={{ padding: '0.5rem', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}
           >
             Home
-          </Link>
-          <Link 
-            to="/find-parking" 
-            onClick={() => setMobileMenuOpen(false)}
-            style={{ padding: '0.5rem', fontWeight: 600, textDecoration: 'none', color: 'var(--primary)' }}
-          >
-            Find Parking
           </Link>
           <button 
             onClick={() => scrollToSection('how-it-works')}
