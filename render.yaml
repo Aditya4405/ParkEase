@@ -1,0 +1,38 @@
+services:
+  # -------------------------------------------------------------
+  # Backend Spring Boot Web Service
+  # -------------------------------------------------------------
+  - type: web
+    name: parkease-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        fromDatabase:
+          name: parkease-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: parkease-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: parkease-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+
+# -------------------------------------------------------------
+  # Managed PostgreSQL Database on Render
+# -------------------------------------------------------------
+databases:
+  - name: parkease-db
+    databaseName: parkease
+    user: parkease_user
+    plan: free
+    region: singapore

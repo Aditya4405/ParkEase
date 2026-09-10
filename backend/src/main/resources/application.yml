@@ -1,13 +1,13 @@
 server:
-  port: ${SERVER_PORT:8086}
+  port: ${PORT:${SERVER_PORT:8086}}
 
 spring:
   application:
     name: parkease-backend
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/parkease}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://localhost:5432/parkease}}
+    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:postgres}}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
