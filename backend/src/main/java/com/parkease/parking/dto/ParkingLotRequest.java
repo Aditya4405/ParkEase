@@ -23,8 +23,20 @@ public class ParkingLotRequest {
     @NotBlank(message = "City is required")
     private String city;
 
+    private String state;
+
     @NotBlank(message = "Pincode is required")
     private String pincode;
+
+    private String parkingType;
+    private Integer totalCapacity;
+    private String openingTime;
+    private String closingTime;
+    private Boolean hasEVCharging;
+    private String category;
+    private String nearbyDestination;
+    private String dataSource;
+    private String externalSourceId;
 
     @Builder.Default
     private Boolean active = true;

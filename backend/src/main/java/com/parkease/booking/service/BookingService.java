@@ -132,6 +132,12 @@ public class BookingService {
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
+
+        // Update dynamic lot reservation capacity counter
+        lot.setReservedSlots(lot.getReservedSlots() + 1);
+        lot.setLastOccupancyUpdate(LocalDateTime.now());
+        parkingLotRepository.save(lot);
+
         return mapToBookingResponse(savedBooking);
     }
 
@@ -185,6 +191,15 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.CANCELLED);
         Booking updated = bookingRepository.save(booking);
+
+        // Decrement dynamic lot reservation counter if applicable
+        ParkingLot lot = booking.getParkingSlot().getParkingLot();
+        if (lot != null && lot.getReservedSlots() > 0) {
+            lot.setReservedSlots(lot.getReservedSlots() - 1);
+            lot.setLastOccupancyUpdate(LocalDateTime.now());
+            parkingLotRepository.save(lot);
+        }
+
         return mapToBookingResponse(updated);
     }
 

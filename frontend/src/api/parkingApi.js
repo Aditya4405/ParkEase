@@ -17,4 +17,9 @@ export const parkingApi = {
   addSlot: (lotId, data) => api.post(`/parking-lots/${lotId}/slots`, data),
   updateSlot: (id, data) => api.put(`/parking-slots/${id}`, data),
   deleteSlot: (id) => api.delete(`/parking-slots/${id}`),
+
+  // Real-Time Occupancy Telemetry
+  getAvailability: (lotId) => api.get(`/parking-lots/${lotId}/availability`),
+  recordOccupancyEvent: (lotId, data) => api.post(`/parking-lots/${lotId}/occupancy`, data),
+  getOccupancyEvents: (lotId) => api.get(`/parking-lots/${lotId}/occupancy-events`),
 };

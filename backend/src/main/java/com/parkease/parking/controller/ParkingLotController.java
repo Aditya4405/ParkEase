@@ -1,7 +1,7 @@
 package com.parkease.parking.controller;
 
-import com.parkease.parking.dto.ParkingLotRequest;
-import com.parkease.parking.dto.ParkingLotResponse;
+import com.parkease.parking.dto.*;
+import com.parkease.parking.entity.ParkingOccupancyEvent;
 import com.parkease.parking.service.ParkingLotService;
 import com.parkease.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,24 +21,31 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/parking-lots")
 @RequiredArgsConstructor
-@Tag(name = "Parking Lots", description = "Endpoints for discovering, creating, and managing parking lots")
+@Tag(name = "Parking Lots", description = "Endpoints for discovering, creating, and managing parking lots & real-time telemetry")
 public class ParkingLotController {
 
     private final ParkingLotService parkingLotService;
 
     @GetMapping
-    @Operation(summary = "Search active parking lots by city or keyword (Public)")
+    @Operation(summary = "Search active parking lots by destination, city, keyword or category (Public)")
     public ResponseEntity<List<ParkingLotResponse>> searchParkingLots(
             @RequestParam(required = false) String city,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category
     ) {
-        return ResponseEntity.ok(parkingLotService.searchParkingLots(city, search));
+        return ResponseEntity.ok(parkingLotService.searchParkingLots(city, search, category));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get parking lot details and slots by ID (Public)")
     public ResponseEntity<ParkingLotResponse> getParkingLotById(@PathVariable Long id) {
         return ResponseEntity.ok(parkingLotService.getParkingLotById(id));
+    }
+
+    @GetMapping("/{id}/availability")
+    @Operation(summary = "Get real-time dynamic occupancy breakdown (Public)")
+    public ResponseEntity<ParkingLotAvailabilityResponse> getAvailability(@PathVariable Long id) {
+        return ResponseEntity.ok(parkingLotService.getAvailability(id));
     }
 
     @GetMapping("/owner/my")
@@ -59,7 +66,7 @@ public class ParkingLotController {
             @Valid @RequestBody ParkingLotRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
-        return new ResponseEntity<>(parkingLotService.createParkingLot(request, currentUser), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(parkingLotService.createParkingLot(request, currentUser));
     }
 
     @PutMapping("/{id}")
@@ -84,5 +91,31 @@ public class ParkingLotController {
     ) {
         parkingLotService.deleteParkingLot(id, currentUser);
         return ResponseEntity.ok(Map.of("message", "Parking lot deleted successfully"));
+    }
+
+    // -------------------------------------------------------------
+    // Real-Time Occupancy Telemetry Endpoints
+    // -------------------------------------------------------------
+    @PostMapping("/{id}/occupancy")
+    @Operation(summary = "Record vehicle ENTRY or EXIT event (Simulated Operator / Boom Barrier telemetry) (OWNER or ADMIN)")
+    @SecurityRequirement(name = "BearerAuth")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<OccupancyEventResponse> recordOccupancyEvent(
+            @PathVariable Long id,
+            @Valid @RequestBody OccupancyEventRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return ResponseEntity.ok(parkingLotService.recordOccupancyEvent(id, request, currentUser));
+    }
+
+    @GetMapping("/{id}/occupancy-events")
+    @Operation(summary = "Get recent occupancy telemetry events for audit/history (OWNER or ADMIN)")
+    @SecurityRequirement(name = "BearerAuth")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<List<ParkingOccupancyEvent>> getOccupancyEvents(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return ResponseEntity.ok(parkingLotService.getOccupancyEvents(id, currentUser));
     }
 }

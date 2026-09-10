@@ -2,364 +2,457 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { parkingApi } from '../../api/parkingApi';
 import ParkingLotCard from '../../components/parking/ParkingLotCard';
-import MapVisualizer from '../../components/parking/MapVisualizer';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import EmptyState from '../../components/common/EmptyState';
-import ErrorMessage from '../../components/common/ErrorMessage';
 import { 
   Search, 
   MapPin, 
   Filter, 
-  RotateCcw, 
+  RotateCw, 
   Car, 
-  Building2, 
-  SlidersHorizontal, 
+  Bike, 
   Zap, 
-  Compass, 
-  List, 
-  Map as MapIcon, 
-  ArrowUpDown,
-  CheckCircle2
+  CheckCircle, 
+  SlidersHorizontal,
+  X,
+  Database,
+  Building,
+  Navigation,
+  ShieldCheck,
+  Tag
 } from 'lucide-react';
-import { INDIAN_CITIES } from '../../data/indianDestinations';
+import { INDIAN_CITIES, DESTINATION_CATEGORIES } from '../../data/indianDestinations';
 
 const ParkingLotsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [lots, setLots] = useState([]);
+  const [parkingLots, setParkingLots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  const [city, setCity] = useState(searchParams.get('city') || 'Lucknow');
-  const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [vehicleFilter, setVehicleFilter] = useState('ALL');
-  const [availabilityOnly, setAvailabilityOnly] = useState(false);
-  const [sortBy, setSortBy] = useState('FEATURED'); // FEATURED, PRICE_LOW, SLOTS_HIGH
-  const [selectedLotOnMap, setSelectedLotOnMap] = useState(null);
+  // Filters State
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'ALL');
+  const [selectedVehicleType, setSelectedVehicleType] = useState('ALL');
+  const [evOnly, setEvOnly] = useState(false);
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(100);
+  const [selectedDataSource, setSelectedDataSource] = useState('ALL');
 
-  // Mobile View Toggle: 'list' | 'map'
-  const [mobileView, setMobileView] = useState('list');
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  // Mobile Filter Drawer
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const fetchLots = async (cityName, searchName) => {
-    setLoading(true);
-    setError(null);
+  // Fetch Parking Lots from Backend
+  const fetchParkingLots = async (showRefreshIndicator = false) => {
     try {
-      const params = {};
-      const targetCity = cityName !== undefined ? cityName : city;
-      const targetSearch = searchName !== undefined ? searchName : search;
-
-      if (targetCity && targetCity !== 'All Cities') params.city = targetCity.trim();
-      if (targetSearch.trim()) params.search = targetSearch.trim();
-
-      const res = await parkingApi.searchParkingLots(params);
-      setLots(res.data);
-      if (res.data.length > 0) {
-        setSelectedLotOnMap(res.data[0]);
+      if (showRefreshIndicator) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
+      setError(null);
+
+      const params = {};
+      if (selectedCity && selectedCity.trim() !== '') {
+        params.city = selectedCity.trim();
+      }
+      if (searchQuery && searchQuery.trim() !== '') {
+        params.search = searchQuery.trim();
+      }
+      if (selectedCategory && selectedCategory !== 'ALL') {
+        params.category = selectedCategory;
+      }
+
+      const response = await parkingApi.searchParkingLots(params);
+      setParkingLots(response.data || []);
     } catch (err) {
-      setError(err);
+      console.error('Failed to load parking lots:', err);
+      setError('Unable to load parking locations. Please check your connection and retry.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    const initialCity = searchParams.get('city') || 'Lucknow';
-    const initialSearch = searchParams.get('search') || '';
-    setCity(initialCity);
-    setSearch(initialSearch);
-    fetchLots(initialCity, initialSearch);
-  }, [searchParams]);
+    fetchParkingLots();
+  }, [selectedCity, selectedCategory]);
 
-  const handleFilterSubmit = (e) => {
-    if (e) e.preventDefault();
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
     const newParams = {};
-    if (city && city !== 'All Cities') newParams.city = city.trim();
-    if (search.trim()) newParams.search = search.trim();
+    if (searchQuery) newParams.search = searchQuery;
+    if (selectedCity) newParams.city = selectedCity;
+    if (selectedCategory !== 'ALL') newParams.category = selectedCategory;
     setSearchParams(newParams);
-    fetchLots(city, search);
-    setMobileFilterOpen(false);
+    fetchParkingLots();
   };
 
-  const handleReset = () => {
-    setCity('Lucknow');
-    setSearch('');
-    setVehicleFilter('ALL');
-    setAvailabilityOnly(false);
-    setSortBy('FEATURED');
-    setSearchParams({ city: 'Lucknow' });
-    fetchLots('Lucknow', '');
+  const handleCitySelect = (cityName) => {
+    setSelectedCity(cityName);
+    const newParams = {};
+    if (searchQuery) newParams.search = searchQuery;
+    if (cityName) newParams.city = cityName;
+    if (selectedCategory !== 'ALL') newParams.category = selectedCategory;
+    setSearchParams(newParams);
   };
 
-  // Filter and Sort Processing
-  let processedLots = lots.filter((lot) => {
-    if (vehicleFilter !== 'ALL') {
-      const hasType = lot.slots?.some((s) => s.vehicleType === vehicleFilter && s.active);
-      if (!hasType) return false;
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId);
+    const newParams = {};
+    if (searchQuery) newParams.search = searchQuery;
+    if (selectedCity) newParams.city = selectedCity;
+    if (catId !== 'ALL') newParams.category = catId;
+    setSearchParams(newParams);
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedCity('');
+    setSelectedCategory('ALL');
+    setSelectedVehicleType('ALL');
+    setEvOnly(false);
+    setAvailableOnly(false);
+    setMaxPrice(100);
+    setSelectedDataSource('ALL');
+    setSearchParams({});
+  };
+
+  // Client-Side Refinements
+  const filteredLots = parkingLots.filter((lot) => {
+    // Vehicle type filter
+    if (selectedVehicleType !== 'ALL') {
+      const hasType = lot.slots?.some(
+        (s) => s.vehicleType === selectedVehicleType && s.active
+      );
+      if (!hasType && lot.slots && lot.slots.length > 0) return false;
     }
-    if (availabilityOnly) {
-      const freeSlots = lot.slots ? lot.slots.filter((s) => s.isAvailable && s.active).length : (lot.availableSlots || 0);
-      if (freeSlots <= 0) return false;
+
+    // EV Only filter
+    if (evOnly) {
+      const hasEV = lot.hasEVCharging || lot.slots?.some((s) => s.vehicleType === 'EV' && s.active);
+      if (!hasEV) return false;
     }
+
+    // Available Only filter
+    if (availableOnly) {
+      const openSlots = lot.availableSlots !== undefined ? lot.availableSlots : 1;
+      if (openSlots <= 0) return false;
+    }
+
+    // Data Source filter
+    if (selectedDataSource !== 'ALL') {
+      if (lot.dataSource !== selectedDataSource) return false;
+    }
+
+    // Max Price filter
+    const minPrice = lot.startingPrice || (lot.slots && lot.slots.length > 0 ? Math.min(...lot.slots.map((s) => s.price || 40)) : 30);
+    if (minPrice > maxPrice) return false;
+
     return true;
   });
 
-  if (sortBy === 'PRICE_LOW') {
-    processedLots.sort((a, b) => {
-      const priceA = a.startingPrice || (a.slots && a.slots[0]?.price) || 999;
-      const priceB = b.startingPrice || (b.slots && b.slots[0]?.price) || 999;
-      return priceA - priceB;
-    });
-  } else if (sortBy === 'SLOTS_HIGH') {
-    processedLots.sort((a, b) => {
-      const freeA = a.availableSlots || (a.slots ? a.slots.filter((s) => s.isAvailable).length : 0);
-      const freeB = b.availableSlots || (b.slots ? b.slots.filter((s) => s.isAvailable).length : 0);
-      return freeB - freeA;
-    });
-  }
-
   return (
-    <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      {/* Page Heading & Indian Hub Context */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span className="badge badge-primary" style={{ fontSize: '0.72rem' }}>
-              🇮🇳 India Smart Parking Radar
-            </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              • {city || 'All Hubs'} Area
-            </span>
+    <div className="container" style={{ padding: '2rem 1rem 4rem' }}>
+      {/* Top Destination Search Header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary-subtle)', color: 'var(--primary)', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+              <Navigation size={13} /> Destination-Based Discovery
+            </div>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
+              Find Parking Near Your Destination
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.2rem' }}>
+              Discover verified parking facilities near malls, railway stations, hospitals, colleges and markets across India.
+            </p>
           </div>
-          <h1 className="page-title">
-            <Compass size={28} style={{ color: 'var(--primary)' }} />
-            Discover Nearby Parking
-          </h1>
-          <p className="page-subtitle">
-            Live slot availability, hourly rates in ₹, and instant guaranteed reservations.
-          </p>
+
+          <button
+            onClick={() => fetchParkingLots(true)}
+            className="btn btn-secondary"
+            disabled={refreshing}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem', fontWeight: 600 }}
+          >
+            <RotateCw size={15} className={refreshing ? 'spin' : ''} />
+            {refreshing ? 'Updating Telemetry...' : 'Refresh Occupancy'}
+          </button>
         </div>
 
-        {/* Mobile View Toggle Switch */}
-        <div className="mobile-toggle" style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            onClick={() => setMobileView('list')}
-            className={`btn btn-sm ${mobileView === 'list' ? 'btn-primary' : 'btn-secondary'}`}
-          >
-            <List size={16} />
-            <span>List View</span>
+        {/* Search Bar & City Selector */}
+        <form onSubmit={handleSearchSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1.2fr) minmax(180px, 2.5fr) auto', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          {/* City Selector */}
+          <div style={{ position: 'relative' }}>
+            <MapPin size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+            <select
+              value={selectedCity}
+              onChange={(e) => handleCitySelect(e.target.value)}
+              className="form-control"
+              style={{ paddingLeft: '2.5rem', fontWeight: 600, height: '48px', appearance: 'auto' }}
+            >
+              <option value="">All Indian Cities</option>
+              {INDIAN_CITIES.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name} {c.hub ? '(Demo Hub)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Destination / Keyword Input */}
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search destination, mall, railway station, hospital or area (e.g. Phoenix Palassio, Charbagh, KGMU)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="form-control"
+              style={{ paddingLeft: '2.6rem', height: '48px' }}
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ height: '48px', padding: '0 1.5rem', fontWeight: 700 }}>
+            Search Parking
           </button>
-          <button
-            onClick={() => setMobileView('map')}
-            className={`btn btn-sm ${mobileView === 'map' ? 'btn-primary' : 'btn-secondary'}`}
-          >
-            <MapIcon size={16} />
-            <span>Radar Map</span>
-          </button>
+        </form>
+
+        {/* Destination Category Pills */}
+        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+          {DESTINATION_CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleCategorySelect(cat.id)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.45rem 0.95rem',
+                  borderRadius: '999px',
+                  fontSize: '0.82rem',
+                  fontWeight: isSelected ? 700 : 500,
+                  border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border)',
+                  background: isSelected ? 'var(--primary)' : 'var(--surface)',
+                  color: isSelected ? '#ffffff' : 'var(--text-main)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
-        <form onSubmit={handleFilterSubmit}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.1fr 1.5fr 1fr 1fr auto auto',
-              gap: '0.75rem',
-              alignItems: 'center',
-            }}
-          >
-            {/* City Selector */}
-            <div style={{ position: 'relative' }}>
-              <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '13px', color: 'var(--text-muted)' }} />
-              <select
-                className="form-select"
-                value={city}
-                onChange={(e) => {
-                  setCity(e.target.value);
-                }}
-                style={{ paddingLeft: '2.2rem' }}
+      {/* Main Content Layout: Sidebar Filters + Parking Cards Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '2rem', alignItems: 'flex-start' }} className="discovery-layout">
+        
+        {/* Desktop Filter Sidebar */}
+        <div
+          className="filter-sidebar card"
+          style={{
+            padding: '1.4rem',
+            borderRadius: '16px',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            position: 'sticky',
+            top: '90px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', paddingBottom: '0.8rem', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.95rem' }}>
+              <Filter size={16} style={{ color: 'var(--primary)' }} />
+              <span>Filters</span>
+            </div>
+            {(selectedVehicleType !== 'ALL' || evOnly || availableOnly || maxPrice < 100 || selectedDataSource !== 'ALL') && (
+              <button
+                onClick={clearAllFilters}
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
               >
-                <option value="All Cities">All Cities (India)</option>
-                {INDIAN_CITIES.map((c) => (
-                  <option key={c.name} value={c.name}>
-                    {c.name} ({c.state})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Keyword Search */}
-            <div style={{ position: 'relative' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '13px', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Search place, mall, station or area..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{ paddingLeft: '2.2rem' }}
-              />
-            </div>
-
-            {/* Vehicle Type Filter */}
-            <div>
-              <select
-                className="form-select"
-                value={vehicleFilter}
-                onChange={(e) => setVehicleFilter(e.target.value)}
-              >
-                <option value="ALL">All Vehicle Types</option>
-                <option value="CAR">Car / Sedan / Hatch</option>
-                <option value="BIKE">Two-Wheeler / Bike</option>
-                <option value="SUV">SUV / Large Bay</option>
-                <option value="EV">EV Charging Bay ⚡</option>
-              </select>
-            </div>
-
-            {/* Sort Filter */}
-            <div>
-              <select
-                className="form-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="FEATURED">Sort: Featured</option>
-                <option value="PRICE_LOW">Price: Lowest (₹)</option>
-                <option value="SLOTS_HIGH">Availability: Most Slots</option>
-              </select>
-            </div>
-
-            {/* Submit Button */}
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.25rem' }}>
-              <Search size={16} />
-              <span>Filter</span>
-            </button>
-
-            {/* Reset Button */}
-            <button type="button" onClick={handleReset} className="btn btn-secondary" title="Reset all filters">
-              <RotateCcw size={16} />
-            </button>
+                Reset
+              </button>
+            )}
           </div>
 
-          {/* Quick Filter Toggles */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginTop: '1rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.86rem', fontWeight: 600, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={availabilityOnly}
-                onChange={(e) => setAvailabilityOnly(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }}
-              />
-              <span>Show Available Slots Only</span>
+          {/* Vehicle Compatibility Filter */}
+          <div style={{ marginBottom: '1.3rem' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: '0.6rem' }}>
+              Vehicle Type
             </label>
-
-            <span style={{ color: 'var(--border)' }}>|</span>
-
-            {/* Quick City shortcuts */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Quick Hubs:</span>
-              {['Lucknow', 'Noida', 'Delhi', 'Ayodhya', 'Kanpur'].map((c) => (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+              {['ALL', 'CAR', 'BIKE', 'SUV', 'EV'].map((type) => (
                 <button
-                  key={c}
+                  key={type}
                   type="button"
-                  onClick={() => {
-                    setCity(c);
-                    fetchLots(c, search);
-                  }}
+                  onClick={() => setSelectedVehicleType(type)}
                   style={{
-                    fontSize: '0.75rem',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '4px',
-                    background: city === c ? 'var(--primary-light)' : '#f1f5f9',
-                    color: city === c ? 'var(--primary)' : 'var(--text-main)',
-                    fontWeight: city === c ? 700 : 500,
-                    border: '1px solid',
-                    borderColor: city === c ? '#c7d2fe' : 'transparent',
+                    padding: '0.4rem 0.5rem',
+                    borderRadius: '8px',
+                    fontSize: '0.78rem',
+                    fontWeight: selectedVehicleType === type ? 700 : 500,
+                    border: selectedVehicleType === type ? '1px solid var(--primary)' : '1px solid var(--border)',
+                    background: selectedVehicleType === type ? 'var(--primary-subtle)' : '#ffffff',
+                    color: selectedVehicleType === type ? 'var(--primary)' : 'var(--text-main)',
+                    cursor: 'pointer',
+                    textAlign: 'center',
                   }}
                 >
-                  {c}
+                  {type === 'ALL' ? 'All Vehicles' : type}
                 </button>
               ))}
             </div>
           </div>
-        </form>
-      </div>
 
-      <ErrorMessage error={error} onDismiss={() => setError(null)} />
+          {/* Availability & Amenities Toggles */}
+          <div style={{ marginBottom: '1.3rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', display: 'block' }}>
+              Availability & Facilities
+            </label>
+            
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.84rem', cursor: 'pointer', color: '#334155' }}>
+              <input
+                type="checkbox"
+                checked={availableOnly}
+                onChange={(e) => setAvailableOnly(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }}
+              />
+              <span>Open Vacancies Only</span>
+            </label>
 
-      {/* Results Header Counter */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <p style={{ fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.92rem' }}>
-          Showing <strong>{processedLots.length}</strong> smart parking facilities in <strong>{city || 'India'}</strong>
-        </p>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.84rem', cursor: 'pointer', color: '#334155' }}>
+              <input
+                type="checkbox"
+                checked={evOnly}
+                onChange={(e) => setEvOnly(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: '#059669' }}
+              />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Zap size={13} style={{ color: '#059669' }} /> EV Fast-Charging Points
+              </span>
+            </label>
+          </div>
 
-        {processedLots.length > 0 && (
-          <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>
-            <CheckCircle2 size={12} /> Live Inventory Connected
-          </span>
-        )}
-      </div>
+          {/* Data Source Provenance Filter */}
+          <div style={{ marginBottom: '1.3rem' }}>
+            <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: '0.5rem' }}>
+              Data Source Provenance
+            </label>
+            <select
+              value={selectedDataSource}
+              onChange={(e) => setSelectedDataSource(e.target.value)}
+              className="form-control"
+              style={{ fontSize: '0.8rem', padding: '0.45rem 0.6rem' }}
+            >
+              <option value="ALL">All Verified Sources</option>
+              <option value="OPENSTREETMAP">OpenStreetMap Verified</option>
+              <option value="OPERATOR_PORTAL">Operator Registered</option>
+              <option value="MUNICIPAL_DATA">Municipal Open Datasets</option>
+            </select>
+          </div>
 
-      {/* Split View Layout (Desktop: Left List + Right Sticky Map) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: mobileView === 'map' ? '1fr' : '1.2fr 1fr',
-          gap: '1.5rem',
-          alignItems: 'start',
-        }}
-      >
-        {/* Left Column: Results List */}
-        <div style={{ display: mobileView === 'map' ? 'none' : 'block' }}>
+          {/* Hourly Price Range Filter */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                Max Tariff:
+              </label>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>
+                ₹{maxPrice}/hr
+              </span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              step="5"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <span>₹10</span>
+              <span>₹50</span>
+              <span>₹100</span>
+            </div>
+          </div>
+
+          {/* Architecture Transparency Note */}
+          <div style={{ marginTop: '1.4rem', padding: '0.8rem', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#475569', lineHeight: '1.4' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.2rem' }}>
+              <ShieldCheck size={14} style={{ color: 'var(--primary)' }} />
+              <span>Real Data Architecture</span>
+            </div>
+            Static locations sourced from OpenStreetMap & Operator portals. Live occupancy updated via IoT telemetry events.
+          </div>
+        </div>
+
+        {/* Parking Results List View */}
+        <div>
+          {/* Results Summary Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.92rem', color: '#475569', fontWeight: 600 }}>
+              Showing <strong style={{ color: 'var(--primary)' }}>{filteredLots.length}</strong> parking facilities
+              {selectedCity ? ` in ${selectedCity}` : ''}
+              {selectedCategory !== 'ALL' ? ` for ${DESTINATION_CATEGORIES.find(c => c.id === selectedCategory)?.name}` : ''}
+            </span>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              <span>Verified Capacity: {filteredLots.reduce((acc, lot) => acc + (lot.totalCapacity || lot.totalSlots || 100), 0)} bays</span>
+            </div>
+          </div>
+
+          {/* Results Display */}
           {loading ? (
-            <SkeletonLoader count={4} />
-          ) : processedLots.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {processedLots.map((lot) => (
-                <div
-                  key={lot.id}
-                  onClick={() => setSelectedLotOnMap(lot)}
-                  style={{
-                    cursor: 'pointer',
-                    borderRadius: 'var(--radius-lg)',
-                    outline: selectedLotOnMap && selectedLotOnMap.id === lot.id ? '2px solid var(--primary)' : 'none',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <ParkingLotCard lot={lot} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="card" style={{ padding: '1.5rem', height: '240px' }}>
+                  <SkeletonLoader lines={5} />
                 </div>
               ))}
             </div>
-          ) : (
+          ) : error ? (
+            <div className="card" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+              <h3 style={{ color: 'var(--danger)', marginBottom: '0.5rem' }}>Connection Error</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{error}</p>
+              <button onClick={() => fetchParkingLots()} className="btn btn-primary">
+                Retry Discovery
+              </button>
+            </div>
+          ) : filteredLots.length === 0 ? (
             <EmptyState
-              title="No Parking Lots Found"
-              description={`We couldn't find any parking facilities matching your criteria in ${city}. Try resetting filters or choosing another city.`}
-              actionText="Reset Filters & Show Lucknow"
-              onAction={handleReset}
+              icon={<Search size={40} style={{ color: 'var(--text-muted)' }} />}
+              title="No Parking Facilities Found"
+              description="No parking facilities matched your destination, city, or filter criteria. Try expanding your search or selecting another Indian city."
+              actionLabel="Reset All Filters"
+              onAction={clearAllFilters}
             />
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '1.3rem' }}>
+              {filteredLots.map((lot) => (
+                <ParkingLotCard key={lot.id} lot={lot} />
+              ))}
+            </div>
           )}
         </div>
-
-        {/* Right Column: Sticky Map Radar */}
-        <div
-          style={{
-            position: 'sticky',
-            top: '90px',
-            display: mobileView === 'list' && window.innerWidth <= 768 ? 'none' : 'block',
-            height: 'calc(100vh - 120px)',
-            minHeight: '520px',
-          }}
-        >
-          <MapVisualizer
-            parkingLots={processedLots}
-            selectedLot={selectedLotOnMap}
-            onSelectLot={(lot) => setSelectedLotOnMap(lot)}
-            city={city || 'Lucknow'}
-          />
-        </div>
       </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .discovery-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .filter-sidebar {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

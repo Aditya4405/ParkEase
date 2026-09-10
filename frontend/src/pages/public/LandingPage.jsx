@@ -11,18 +11,21 @@ import {
   Zap, 
   CheckCircle2, 
   Car, 
+  Bike,
   ArrowRight, 
   Building2, 
-  Sparkles,
   ShoppingBag,
   Train,
   Activity,
-  Store,
-  Landmark,
-  Compass,
-  CreditCard,
+  BookOpen,
+  Briefcase,
   Navigation,
-  Star
+  Database,
+  Cpu,
+  Radio,
+  Server,
+  Sparkles,
+  Layers
 } from 'lucide-react';
 import { 
   INDIAN_CITIES, 
@@ -31,349 +34,393 @@ import {
 } from '../../data/indianDestinations';
 
 const LandingPage = () => {
-  const [lots, setLots] = useState([]);
+  const [featuredLots, setFeaturedLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState('Lucknow');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchFeaturedLots = async () => {
+    const fetchLots = async () => {
       try {
-        const res = await parkingApi.searchParkingLots();
-        setLots(res.data.slice(0, 4));
+        const res = await parkingApi.searchParkingLots({ city: 'Lucknow' });
+        setFeaturedLots(res.data?.slice(0, 6) || []);
       } catch (err) {
-        console.error('Failed to load parking lots:', err);
+        console.error('Failed to load featured parking lots:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchFeaturedLots();
+    fetchLots();
   }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    const queryParams = new URLSearchParams();
-    if (selectedCity) queryParams.set('city', selectedCity);
-    if (searchQuery.trim()) queryParams.set('search', searchQuery.trim());
-    navigate(`/parking-lots?${queryParams.toString()}`);
+    const params = new URLSearchParams();
+    if (selectedCity) params.set('city', selectedCity);
+    if (searchQuery.trim()) params.set('search', searchQuery.trim());
+    navigate(`/parking-lots?${params.toString()}`);
   };
 
   const handleDestinationClick = (dest) => {
-    const queryParams = new URLSearchParams();
-    queryParams.set('city', dest.city);
-    queryParams.set('search', dest.name);
-    navigate(`/parking-lots?${queryParams.toString()}`);
+    const params = new URLSearchParams();
+    params.set('city', dest.city);
+    params.set('search', dest.name);
+    if (dest.category) params.set('category', dest.category);
+    navigate(`/parking-lots?${params.toString()}`);
   };
 
-  const filteredDestinations = POPULAR_DESTINATIONS.filter((d) => {
-    const matchesCategory = selectedCategory === 'all' || d.category === selectedCategory;
-    const matchesCity = !selectedCity || d.city.toLowerCase() === selectedCity.toLowerCase() || (selectedCity === 'Delhi NCR' && (d.city === 'Delhi' || d.city === 'Noida'));
-    return matchesCategory;
-  });
+  const handleCategoryClick = (categoryId) => {
+    const params = new URLSearchParams();
+    if (selectedCity) params.set('city', selectedCity);
+    if (categoryId !== 'ALL') params.set('category', categoryId);
+    navigate(`/parking-lots?${params.toString()}`);
+  };
+
+  const getCategoryIcon = (id) => {
+    switch(id) {
+      case 'MALL': return <ShoppingBag size={18} />;
+      case 'RAILWAY_STATION': return <Train size={18} />;
+      case 'HOSPITAL': return <Activity size={18} />;
+      case 'COLLEGE': return <BookOpen size={18} />;
+      case 'MARKET': return <Briefcase size={18} />;
+      case 'AIRPORT': return <Navigation size={18} />;
+      case 'TOURIST': return <MapPin size={18} />;
+      default: return <Building2 size={18} />;
+    }
+  };
 
   return (
-    <div>
-      {/* 1. Hero Section */}
-      <section
-        style={{
-          background: 'radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.14) 0%, rgba(2, 132, 199, 0.06) 45%, #f8fafc 100%)',
-          padding: '4.5rem 0 3.5rem',
-          borderBottom: '1px solid var(--border)',
-          position: 'relative',
-        }}
-      >
-        <div className="container" style={{ textAlign: 'center', maxWidth: '920px' }}>
-          {/* India Flag & Startup Badge */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.4rem 1.1rem',
-              borderRadius: 'var(--radius-full)',
-              background: '#ffffff',
-              color: 'var(--primary-dark)',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              marginBottom: '1.5rem',
-              border: '1px solid #c7d2fe',
-              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.08)',
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>🇮🇳</span>
-            <span>ParkEase — Smart Parking for India</span>
-            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#94a3b8' }} />
-            <span style={{ color: '#059669' }}>Live Across 10+ Cities</span>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      
+      {/* =========================================================
+          HERO SECTION
+          ========================================================= */}
+      <section style={{ 
+        background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)', 
+        borderBottom: '1px solid var(--border)',
+        padding: '3.5rem 1rem 4rem',
+        textAlign: 'center',
+        position: 'relative'
+      }}>
+        <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
+          
+          {/* Top Indian Tech Badge */}
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.45rem', 
+            padding: '0.35rem 0.9rem', 
+            borderRadius: '999px', 
+            background: 'var(--primary-subtle)', 
+            color: 'var(--primary)', 
+            fontSize: '0.82rem', 
+            fontWeight: 700, 
+            marginBottom: '1.2rem' 
+          }}>
+            <Sparkles size={14} /> Smart Parking Infrastructure for India • Lucknow Hub
           </div>
 
-          {/* Core Headline */}
-          <h1
-            style={{
-              fontSize: '3.4rem',
-              fontWeight: 800,
-              lineHeight: '1.15',
-              letterSpacing: '-0.03em',
-              marginBottom: '1.25rem',
-              color: '#0f172a',
-            }}
-          >
-            Find Parking.{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Reach Faster.
-            </span>{' '}
-            Park Smarter.
+          {/* Main Headline */}
+          <h1 style={{ 
+            fontSize: '3.1rem', 
+            fontWeight: 900, 
+            color: 'var(--text-main)', 
+            lineHeight: '1.15', 
+            letterSpacing: '-1px',
+            marginBottom: '1rem' 
+          }}>
+            Find Parking. Reach Faster. <br />
+            <span style={{ 
+              background: 'linear-gradient(90deg, var(--primary) 0%, #0284c7 100%)', 
+              WebkitBackgroundClip: 'text', 
+              WebkitTextFillColor: 'transparent' 
+            }}>
+              Park Smarter.
+            </span>
           </h1>
 
-          {/* Supporting Text */}
-          <p
-            style={{
-              fontSize: '1.15rem',
-              color: 'var(--text-muted)',
-              lineHeight: '1.6',
-              marginBottom: '2.25rem',
-              maxWidth: '750px',
-              margin: '0 auto 2.25rem',
-            }}
-          >
-            Discover and reserve convenient parking near malls, hospitals, railway stations, colleges and popular places across India.
+          {/* Supporting Subtitle */}
+          <p style={{ 
+            fontSize: '1.12rem', 
+            color: 'var(--text-muted)', 
+            lineHeight: '1.6', 
+            maxWidth: '720px', 
+            margin: '0 auto 2.2rem' 
+          }}>
+            Discover and reserve convenient parking near malls, hospitals, railway stations, colleges and popular destinations across India.
           </p>
 
-          {/* City Quick Pills */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              flexWrap: 'wrap',
-              marginBottom: '1.5rem',
-            }}
-          >
-            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: '0.25rem' }}>
-              Select City:
-            </span>
-            {INDIAN_CITIES.slice(0, 6).map((c) => (
-              <button
-                key={c.name}
-                type="button"
-                className={`city-pill ${selectedCity === c.name ? 'active' : ''}`}
-                onClick={() => setSelectedCity(c.name)}
-              >
-                <MapPin size={13} />
-                <span>{c.name}</span>
-                {c.isPrimary && <span style={{ fontSize: '0.65rem', opacity: 0.9 }}>• Hub</span>}
+          {/* Search Box Card */}
+          <div className="card" style={{ 
+            padding: '1.25rem', 
+            borderRadius: '18px', 
+            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e2e8f0',
+            background: '#ffffff',
+            textAlign: 'left'
+          }}>
+            <form onSubmit={handleSearchSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(180px, 1.2fr) minmax(220px, 2.5fr) auto', gap: '0.75rem' }}>
+              
+              {/* City Selection */}
+              <div style={{ position: 'relative' }}>
+                <MapPin size={18} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                <select
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="form-control"
+                  style={{ paddingLeft: '2.4rem', height: '52px', fontWeight: 600, fontSize: '0.95rem' }}
+                >
+                  {INDIAN_CITIES.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name} {c.hub ? '(Demo Hub)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Destination Query */}
+              <div style={{ position: 'relative' }}>
+                <Search size={18} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search for a mall, hospital, railway station or area..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="form-control"
+                  style={{ paddingLeft: '2.5rem', height: '52px', fontSize: '0.95rem' }}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ height: '52px', padding: '0 1.8rem', fontWeight: 700, fontSize: '1rem' }}>
+                Find Parking
               </button>
-            ))}
+            </form>
+
+            {/* Quick Keyword Suggestions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontWeight: 600 }}>Popular in Lucknow:</span>
+              {['Phoenix Palassio', 'Charbagh Station', 'KGMU Trauma Centre', 'Hazratganj', 'Lulu Mall'].map((kw) => (
+                <button
+                  key={kw}
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(kw);
+                    navigate(`/parking-lots?city=${selectedCity}&search=${encodeURIComponent(kw)}`);
+                  }}
+                  style={{
+                    background: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '999px',
+                    padding: '0.2rem 0.65rem',
+                    fontSize: '0.78rem',
+                    color: '#334155',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  {kw}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Main Search Component */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="glass-panel"
-            style={{
-              padding: '0.85rem',
-              display: 'grid',
-              gridTemplateColumns: '1.8fr auto auto',
-              gap: '0.65rem',
-              maxWidth: '820px',
-              margin: '0 auto 1.5rem',
-              textAlign: 'left',
-              boxShadow: 'var(--shadow-lg)',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <Search size={19} style={{ position: 'absolute', left: '14px', top: '15px', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                className="form-input"
-                placeholder='Search destination (e.g. "Phoenix Palassio", "Charbagh Railway Station", "KGMU", "Hazratganj")'
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '2.6rem', height: '48px', fontSize: '0.95rem' }}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-lg" style={{ height: '48px', padding: '0 1.75rem' }}>
-              <Search size={18} />
-              <span>Find Parking</span>
-            </button>
-
-            <Link
-              to={`/parking-lots?city=${encodeURIComponent(selectedCity)}`}
-              className="btn btn-secondary btn-lg"
-              style={{ height: '48px', padding: '0 1.25rem' }}
-            >
-              <Compass size={18} />
-              <span>Explore</span>
+          {/* Quick Action Link */}
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.9rem' }}>
+            <Link to="/parking-lots" style={{ color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
+              Explore All Parking Facilities <ArrowRight size={15} />
             </Link>
-          </form>
-
-          {/* India Key Value Trust Metrics */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '2.5rem',
-              color: 'var(--text-muted)',
-              fontSize: '0.88rem',
-              fontWeight: 600,
-              paddingTop: '0.5rem',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <CheckCircle2 size={17} style={{ color: '#10b981' }} />
-              <span>Zero Double-Booking Guarantee</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <CreditCard size={17} style={{ color: '#0284c7' }} />
-              <span>Transparent Rates in INR (₹)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Zap size={17} style={{ color: '#d97706' }} />
-              <span>EV Charging Bays Available</span>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Popular Parking Destinations (Lucknow & India First) */}
-      <section style={{ padding: '4.5rem 0', background: '#ffffff' }}>
+      {/* =========================================================
+          DESTINATION CATEGORIES
+          ========================================================= */}
+      <section style={{ padding: '3.5rem 1rem', background: '#ffffff', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                <span className="badge badge-primary" style={{ fontSize: '0.72rem' }}>
-                  Lucknow & Key Indian Hubs
-                </span>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '1px' }}>
+              Browse By Category
+            </span>
+            <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.3rem' }}>
+              Parking Near High-Density Destinations
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.2rem' }}>
+              Select a destination type to view associated verified parking hubs with real-time vacancy meters.
+            </p>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', 
+            gap: '1rem' 
+          }}>
+            {DESTINATION_CATEGORIES.filter(c => c.id !== 'ALL').map((cat) => (
+              <div
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.id)}
+                className="card"
+                style={{
+                  padding: '1.3rem',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.9rem',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <div style={{ 
+                  width: '42px', 
+                  height: '42px', 
+                  borderRadius: '10px', 
+                  background: 'var(--primary-subtle)', 
+                  color: 'var(--primary)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  flexShrink: 0 
+                }}>
+                  {getCategoryIcon(cat.id)}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.15rem' }}>
+                    {cat.name}
+                  </h4>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                    {cat.label}
+                  </span>
+                </div>
               </div>
-              <h2 style={{ fontSize: '2.2rem', color: 'var(--text-main)' }}>
-                Popular Parking Destinations
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          POPULAR DESTINATIONS GRID
+          ========================================================= */}
+      <section style={{ padding: '3.5rem 1rem', background: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.2rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '1px' }}>
+                Major Indian Landmarks
+              </span>
+              <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.3rem' }}>
+                Popular Lucknow & Transit Destinations
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-                Find verified parking slots near top malls, transit junctions, hospitals and shopping markets.
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.2rem' }}>
+                Pre-book verified multi-level and surface parking before you arrive.
               </p>
             </div>
 
-            <Link to="/parking-lots" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>View All Locations</span>
-              <ArrowRight size={16} />
+            <Link to="/parking-lots" className="btn btn-secondary" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              View All Locations <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Category Filter Tabs */}
-          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
-            {DESTINATION_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                className={`category-tab ${selectedCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat.id)}
-              >
-                {cat.id === 'malls' && <ShoppingBag size={16} />}
-                {cat.id === 'transit' && <Train size={16} />}
-                {cat.id === 'hospitals' && <Activity size={16} />}
-                {cat.id === 'commercial' && <Store size={16} />}
-                {cat.id === 'religious' && <Landmark size={16} />}
-                {cat.id === 'all' && <Compass size={16} />}
-                <span>{cat.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Destination Cards Grid */}
-          <div className="grid-3" style={{ gap: '1.5rem' }}>
-            {filteredDestinations.map((dest) => (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', 
+            gap: '1.3rem' 
+          }}>
+            {POPULAR_DESTINATIONS.slice(0, 6).map((dest) => (
               <div
                 key={dest.id}
+                onClick={() => handleDestinationClick(dest)}
                 className="card"
                 style={{
+                  padding: '1.4rem',
+                  borderRadius: '16px',
+                  border: '1px solid var(--border)',
+                  background: '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  border: '1px solid var(--border)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  padding: '1.5rem',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                {/* Destination Tag */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {dest.categoryLabel}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                    <span style={{ 
+                      fontSize: '0.74rem', 
+                      fontWeight: 700, 
+                      padding: '0.2rem 0.55rem', 
+                      borderRadius: '999px', 
+                      background: 'var(--primary-subtle)', 
+                      color: 'var(--primary)' 
+                    }}>
+                      {dest.categoryName}
                     </span>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.15rem', color: 'var(--text-main)' }}>
-                      {dest.name}
-                    </h3>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '0.15rem 0.5rem', borderRadius: '999px' }}>
+                      {dest.tag}
+                    </span>
                   </div>
 
-                  <span className={`status-pill ${dest.status === 'AVAILABLE' ? 'available' : 'limited'}`}>
-                    <span className="status-indicator-dot" />
-                    {dest.availableSlots} Slots Free
-                  </span>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.3rem' }}>
+                    {dest.name}
+                  </h3>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                    <MapPin size={14} style={{ color: 'var(--primary)' }} />
+                    <span>{dest.area}, {dest.city}</span>
+                  </div>
+
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: '1.45', marginBottom: '1rem' }}>
+                    {dest.desc}
+                  </p>
                 </div>
 
-                {/* Location & Distance */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.86rem', marginBottom: '0.85rem' }}>
-                  <MapPin size={15} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                  <span>{dest.area}, <strong>{dest.city}</strong></span>
-                  <span style={{ color: 'var(--text-subtle)' }}>•</span>
-                  <span style={{ color: '#0284c7', fontWeight: 600 }}>{dest.distanceKm} km away</span>
-                </div>
-
-                {/* Features & EV Badge */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
-                  {dest.features.slice(0, 3).map((f, i) => (
-                    <span key={i} className="badge badge-neutral" style={{ fontSize: '0.7rem' }}>
-                      {f}
-                    </span>
-                  ))}
-                  {dest.hasEV && (
-                    <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
-                      <Zap size={11} /> EV Ready ({dest.evCount} bays)
-                    </span>
-                  )}
-                </div>
-
-                {/* Card Bottom: Starting Price & CTA */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingTop: '0.9rem',
-                    borderTop: '1px solid var(--border)',
-                  }}
-                >
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  paddingTop: '0.8rem', 
+                  borderTop: '1px solid #f1f5f9' 
+                }}>
                   <div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Starting at
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      Tariff From
                     </span>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                      <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)' }}>
-                        ₹{dest.startingPrice}
-                      </span>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>/hr</span>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
+                      ₹{dest.startingPrice}<span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>/hr</span>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDestinationClick(dest)}
-                    className="btn btn-primary btn-sm"
-                    style={{ padding: '0.45rem 1rem' }}
-                  >
-                    <span>View Parking</span>
-                    <ArrowRight size={14} />
-                  </button>
+                  <span style={{ 
+                    fontSize: '0.8rem', 
+                    fontWeight: 700, 
+                    color: 'var(--primary)', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '0.25rem' 
+                  }}>
+                    Find Parking <ArrowRight size={13} />
+                  </span>
                 </div>
               </div>
             ))}
@@ -381,241 +428,252 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* 3. Verified Live Database Lots */}
-      <section style={{ padding: '4.5rem 0', background: 'var(--bg-main)', borderTop: '1px solid var(--border)' }}>
+      {/* =========================================================
+          FEATURED LIVE PARKING HUBS
+          ========================================================= */}
+      <section style={{ padding: '3.5rem 1rem', background: '#ffffff', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.2rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Instant Booking
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '1px' }}>
+                Real-Time Vacancy Meters
               </span>
-              <h2 style={{ fontSize: '2.2rem', marginTop: '0.25rem' }}>Active Smart Parking Facilities</h2>
+              <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.3rem' }}>
+                Featured Parking Facilities in Lucknow
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.2rem' }}>
+                Live capacity tracked via simulated boom-barrier telemetry and online advance bookings.
+              </p>
             </div>
-            <Link to="/parking-lots" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>Browse All Facilities</span>
-              <ArrowRight size={16} />
+
+            <Link to="/parking-lots?city=Lucknow" className="btn btn-secondary" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              Search Lucknow Hubs <ArrowRight size={14} />
             </Link>
           </div>
 
           {loading ? (
-            <SkeletonLoader count={4} />
-          ) : lots.length > 0 ? (
-            <div className="grid-4">
-              {lots.map((lot) => (
-                <ParkingLotCard key={lot.id} lot={lot} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card" style={{ padding: '1.5rem', height: '240px' }}>
+                  <SkeletonLoader lines={5} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
-              <p style={{ color: 'var(--text-muted)' }}>No parking lots available in database yet.</p>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+              gap: '1.3rem' 
+            }}>
+              {featuredLots.map((lot) => (
+                <ParkingLotCard key={lot.id} lot={lot} />
+              ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* 4. How It Works Section */}
-      <section style={{ padding: '4.5rem 0', background: '#ffffff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      {/* =========================================================
+          HOW PARKEASE WORKS (4-STEP FLOW)
+          ========================================================= */}
+      <section style={{ padding: '4rem 1rem', background: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '650px', margin: '0 auto 3.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              4-Step Fast Reservation
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '1px' }}>
+              Seamless Experience
             </span>
-            <h2 style={{ fontSize: '2.2rem', marginTop: '0.25rem', marginBottom: '0.75rem' }}>How ParkEase India Works</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>
-              Reserve your verified slot in 60 seconds and drive straight into your assigned bay.
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.3rem' }}>
+              How ParkEase Works
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '600px', margin: '0.3rem auto 0' }}>
+              From discovering nearby facilities to automated boom-barrier clearance in four simple steps.
             </p>
           </div>
 
-          <div className="grid-4">
-            <div className="card" style={{ textAlign: 'center', padding: '2rem 1.5rem', position: 'relative' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+            {[
+              {
+                step: '01',
+                title: 'Search Destination',
+                desc: 'Enter any Indian mall, railway station, hospital, or high-density area.',
+                icon: <Search size={22} style={{ color: 'var(--primary)' }} />
+              },
+              {
+                step: '02',
+                title: 'Compare Live Vacancy',
+                desc: 'View real-time open bays, hourly rates, vehicle compatibility, and EV chargers.',
+                icon: <Radio size={22} style={{ color: '#0284c7' }} />
+              },
+              {
+                step: '03',
+                title: 'Reserve Slot & Pass',
+                desc: 'Select your time window, reserve guaranteed capacity, and receive an instant QR pass.',
+                icon: <CheckCircle2 size={22} style={{ color: '#059669' }} />
+              },
+              {
+                step: '04',
+                title: 'Fastag & Gate Entry',
+                desc: 'Drive into the designated facility with automated sensor / Fastag gate clearance.',
+                icon: <Car size={22} style={{ color: '#d97706' }} />
+              }
+            ].map((item) => (
               <div
+                key={item.step}
+                className="card"
                 style={{
-                  width: '56px',
-                  height: '56px',
+                  padding: '1.8rem',
                   borderRadius: '16px',
-                  background: 'var(--primary-light)',
-                  color: 'var(--primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.25rem',
-                  fontWeight: 800,
-                  fontSize: '1.25rem',
+                  background: '#ffffff',
+                  border: '1px solid var(--border)',
+                  position: 'relative'
                 }}
               >
-                1
-              </div>
-              <h4 style={{ fontSize: '1.15rem', marginBottom: '0.5rem' }}>Search Destination</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Look up your destination mall, station, hospital or market in Lucknow & top Indian cities.
-              </p>
-            </div>
-
-            <div className="card" style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '16px',
-                  background: '#e0f2fe',
-                  color: '#0284c7',
-                  display: 'flex',
-                  alignItems: 'center',
+                <div style={{ 
+                  fontSize: '1.8rem', 
+                  fontWeight: 900, 
+                  color: '#e2e8f0', 
+                  position: 'absolute', 
+                  top: '1.2rem', 
+                  right: '1.4rem' 
+                }}>
+                  {item.step}
+                </div>
+                <div style={{ 
+                  width: '46px', 
+                  height: '46px', 
+                  borderRadius: '12px', 
+                  background: 'var(--primary-subtle)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
                   justifyContent: 'center',
-                  margin: '0 auto 1.25rem',
-                  fontWeight: 800,
-                  fontSize: '1.25rem',
-                }}
-              >
-                2
+                  marginBottom: '1.2rem'
+                }}>
+                  {item.icon}
+                </div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                  {item.title}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                  {item.desc}
+                </p>
               </div>
-              <h4 style={{ fontSize: '1.15rem', marginBottom: '0.5rem' }}>Select Vehicle & Slot</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Pick Car, 2-Wheeler, SUV or EV Charging bay with clear upfront hourly rates in INR (₹).
-              </p>
-            </div>
-
-            <div className="card" style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '16px',
-                  background: '#ecfdf5',
-                  color: '#059669',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.25rem',
-                  fontWeight: 800,
-                  fontSize: '1.25rem',
-                }}
-              >
-                3
-              </div>
-              <h4 style={{ fontSize: '1.15rem', marginBottom: '0.5rem' }}>Get Instant Pass</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Receive digital parking slip with slot ID, QR code, navigation directions and time window.
-              </p>
-            </div>
-
-            <div className="card" style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '16px',
-                  background: '#fef3c7',
-                  color: '#d97706',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.25rem',
-                  fontWeight: 800,
-                  fontSize: '1.25rem',
-                }}
-              >
-                4
-              </div>
-              <h4 style={{ fontSize: '1.15rem', marginBottom: '0.5rem' }}>Park & Go</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Arrive and park smoothly with zero search fatigue. Modify or cancel anytime from your dashboard.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 5. Owner Partnership CTA */}
-      <section style={{ padding: '5rem 0', background: 'var(--dark-bg)', color: '#ffffff' }}>
+      {/* =========================================================
+          ENTERPRISE ARCHITECTURE: STATIC VS DYNAMIC DATA
+          ========================================================= */}
+      <section style={{ padding: '4rem 1rem', background: '#ffffff', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.2fr 1fr',
-              gap: '3rem',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: '#818cf8',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  marginBottom: '1.25rem',
-                }}
-              >
-                <Building2 size={16} />
-                <span>For Commercial & Private Lot Owners in India</span>
+          <div style={{ maxWidth: '880px', margin: '0 auto', textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '1px' }}>
+              Architecture & Data Provenance
+            </span>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.3rem' }}>
+              Static Data Sourcing vs. Live Dynamic Occupancy
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.94rem', lineHeight: '1.6', marginTop: '0.4rem' }}>
+              ParkEase separates public static facility data from real-time operational availability, ensuring zero fake sensor claims and enterprise-grade accuracy.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="arch-layout">
+            
+            {/* Static Information Column */}
+            <div className="card" style={{ padding: '2rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.5rem', background: 'var(--primary-subtle)', color: 'var(--primary)', borderRadius: '10px' }}>
+                  <Database size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>1. Static Facility Data</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Verified Infrastructure Metadata</span>
+                </div>
               </div>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', lineHeight: '1.2', marginBottom: '1.25rem' }}>
-                List Your Parking Space & Earn Daily Revenue
-              </h2>
-              <p style={{ color: 'var(--dark-muted)', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
-                Join Indian parking operators using ParkEase to optimize bay utilization, eliminate manual slips, and accept digital reservations seamlessly.
-              </p>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <Link to="/register-owner" className="btn btn-primary btn-lg">
-                  <span>Register as Facility Owner</span>
-                  <ArrowRight size={18} />
-                </Link>
-                <Link to="/login" className="btn btn-secondary btn-lg" style={{ background: 'transparent', color: '#ffffff', borderColor: 'var(--dark-border)' }}>
-                  Owner Login
-                </Link>
-              </div>
+
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.86rem', color: '#334155' }}>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>OpenStreetMap & Municipal Datasets:</strong> Facility name, address, pincode, coordinates, and nearby landmarks.</span>
+                </li>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>Operator Registered Metadata:</strong> Total physical capacity, vehicle type slots, EV chargers, and operating hours.</span>
+                </li>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>Source Provenance:</strong> Each facility carries a verifiable <code>dataSource</code> and <code>externalSourceId</code>.</span>
+                </li>
+              </ul>
             </div>
 
-            <div
-              style={{
-                background: 'var(--dark-surface)',
-                border: '1px solid var(--dark-border)',
-                borderRadius: 'var(--radius-xl)',
-                padding: '2.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div style={{ background: 'rgba(79, 70, 229, 0.2)', color: '#818cf8', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
-                  <Zap size={22} />
+            {/* Dynamic Real-Time Column */}
+            <div className="card" style={{ padding: '2rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.5rem', background: '#ecfdf5', color: '#059669', borderRadius: '10px' }}>
+                  <Radio size={22} />
                 </div>
                 <div>
-                  <h4 style={{ color: '#ffffff', fontSize: '1.1rem', marginBottom: '0.25rem' }}>Real-Time Slot Management</h4>
-                  <p style={{ color: 'var(--dark-muted)', fontSize: '0.9rem' }}>Configure hourly INR tariffs, toggle active availability, and track live occupancy.</p>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>2. Dynamic Occupancy Telemetry</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>Real-Time Availability State</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div style={{ background: 'rgba(2, 132, 199, 0.2)', color: '#38bdf8', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
-                  <ShieldCheck size={22} />
-                </div>
-                <div>
-                  <h4 style={{ color: '#ffffff', fontSize: '1.1rem', marginBottom: '0.25rem' }}>Zero Double-Booking Engine</h4>
-                  <p style={{ color: 'var(--dark-muted)', fontSize: '0.9rem' }}>Transactional backend prevents concurrent slot collisions automatically.</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
-                  <CreditCard size={22} />
-                </div>
-                <div>
-                  <h4 style={{ color: '#ffffff', fontSize: '1.1rem', marginBottom: '0.25rem' }}>Direct Revenue Insights (₹)</h4>
-                  <p style={{ color: 'var(--dark-muted)', fontSize: '0.9rem' }}>Track daily earnings, active reservations and customer vehicle logs.</p>
-                </div>
-              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.86rem', color: '#334155' }}>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>Event-Driven Telemetry:</strong> Simulated ANPR cameras, loop sensors & operator boom-barriers stream <code>ENTRY</code> and <code>EXIT</code> events.</span>
+                </li>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>Synchronized Capacity Formula:</strong> <code>Available = Total - Occupied - Reserved</code> enforced in PostgreSQL transactions.</span>
+                </li>
+                <li style={{ display: 'flex', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: '2px' }} />
+                  <span><strong>Operator Dashboard Control:</strong> Instant interactive entry/exit simulation to test peak-hour occupancy load.</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
+
+      {/* =========================================================
+          FINAL CALL TO ACTION
+          ========================================================= */}
+      <section style={{ 
+        padding: '4.5rem 1rem', 
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', 
+        color: '#ffffff',
+        textAlign: 'center'
+      }}>
+        <div className="container" style={{ maxWidth: '750px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.5px' }}>
+            Ready to Experience Hassle-Free Parking in India?
+          </h2>
+          <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+            Search your destination in Lucknow, Delhi NCR, or major Indian transit hubs and secure guaranteed parking in under 60 seconds.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <Link to="/parking-lots" className="btn btn-primary" style={{ padding: '0.85rem 2rem', fontSize: '1rem', fontWeight: 700 }}>
+              Find Parking Near Destination
+            </Link>
+            <Link to="/register" className="btn btn-secondary" style={{ padding: '0.85rem 1.8rem', fontSize: '1rem', fontWeight: 600, background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
+              Register as Facility Operator
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 800px) {
+          .arch-layout {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
