@@ -6,7 +6,15 @@ import AdminLayout from './AdminLayout';
 import PublicLayout from './PublicLayout';
 
 const AdaptiveParkingLayout = ({ children, pageTitle }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem' }}>Loading ParkEase portal...</div>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     if (user?.role === 'OWNER') {

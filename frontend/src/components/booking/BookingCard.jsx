@@ -154,10 +154,14 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <Link to={`/bookings/${booking.id}`} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <Link to={`/bookings/${booking.id}/ticket`} className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.35rem 0.65rem' }}>
+            <span>QR Pass</span>
+          </Link>
+
+          <Link to={`/bookings/${booking.id}`} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.35rem 0.65rem' }}>
             <Receipt size={13} />
-            <span>Pass</span>
+            <span>Details</span>
           </Link>
 
           {isCancellable && onCancel && (
@@ -165,6 +169,7 @@ const BookingCard = ({ booking, onCancel, cancellingId }) => {
               onClick={() => onCancel(booking.id)}
               disabled={cancellingId === booking.id}
               className="btn btn-danger-outline btn-sm"
+              style={{ padding: '0.35rem 0.6rem' }}
             >
               <XCircle size={13} />
               {cancellingId === booking.id ? '...' : 'Cancel'}
