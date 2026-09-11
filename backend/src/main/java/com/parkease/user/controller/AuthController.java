@@ -27,12 +27,6 @@ public class AuthController {
         return new ResponseEntity<>(authService.register(request, Role.USER), HttpStatus.CREATED);
     }
 
-    @PostMapping("/register-owner")
-    @Operation(summary = "Register a new parking facility owner (OWNER)")
-    public ResponseEntity<AuthResponse> registerOwner(@Valid @RequestBody RegisterRequest request) {
-        return new ResponseEntity<>(authService.register(request, Role.OWNER), HttpStatus.CREATED);
-    }
-
     @PostMapping("/login")
     @Operation(summary = "Authenticate user with email and password, returning JWT token")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {

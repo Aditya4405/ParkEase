@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/parking-slots/**").hasAnyRole("OWNER", "ADMIN")
 
                         // Authenticated user/commuter endpoints
+                        .requestMatchers("/api/v1/owner-applications/**").authenticated()
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/profile/**").authenticated()
                         .requestMatchers("/api/v1/bookings/**").authenticated()
