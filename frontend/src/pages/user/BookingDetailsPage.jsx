@@ -14,7 +14,8 @@ import {
   XCircle, 
   ArrowLeft,
   Printer,
-  ShieldCheck
+  ShieldCheck,
+  QrCode
 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
@@ -130,14 +131,24 @@ const BookingDetailsPage = () => {
           <ArrowLeft size={14} />
           <span>All Bookings</span>
         </Link>
-        <button 
-          onClick={() => window.print()}
-          className="btn btn-secondary btn-sm" 
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-        >
-          <Printer size={14} />
-          <span>Print Pass</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Link 
+            to={`/bookings/${booking?.id}/ticket`}
+            className="btn btn-primary btn-sm" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <QrCode size={14} />
+            <span>Digital QR Pass</span>
+          </Link>
+          <button 
+            onClick={() => window.print()}
+            className="btn btn-secondary btn-sm" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Printer size={14} />
+            <span>Print Pass</span>
+          </button>
+        </div>
       </div>
 
       {successMsg && (

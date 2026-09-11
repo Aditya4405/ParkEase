@@ -96,13 +96,23 @@ const ParkingLotDetailsPage = () => {
     const checkSlots = async () => {
       setCheckingAvailability(true);
       try {
-        const typeParam = vehicleTypeFilter !== 'ALL' ? vehicleTypeFilter : null;
-        const res = await bookingApi.getAvailableSlots(id, typeParam, startTime, endTime);
+        const params = {};
+        if (vehicleTypeFilter !== 'ALL') {
+          params.vehicleType = vehicleTypeFilter;
+        }
+        if (startTime) {
+          params.startTime = startTime;
+        }
+        if (endTime) {
+          params.endTime = endTime;
+        }
+        const res = await bookingApi.getAvailableSlots(id, params);
         setSlotsAvailability(res.data || []);
       } catch (err) {
         console.error('Failed to check slot conflicts:', err);
         setSlotsAvailability(
           (lot.slots || []).map((s) => ({
+            id: s.id,
             slotId: s.id,
             slotNumber: s.slotNumber,
             price: s.price,
@@ -269,15 +279,24 @@ const ParkingLotDetailsPage = () => {
               Guaranteed Reservation • Instant QR Pass
             </p>
 
-            <button
-              onClick={() => openBookingModalWithSlot(null)}
+            <Link
+              to={`/parking-lots/${lot.id}/reserve`}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '0.75rem', fontWeight: 700, fontSize: '0.92rem' }}
-              disabled={isFull}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                fontWeight: 700,
+                fontSize: '0.92rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                textDecoration: 'none'
+              }}
             >
               <Calendar size={16} />
               <span>{isFull ? 'Facility Full' : 'Reserve Parking Slot'}</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -431,11 +450,12 @@ const ParkingLotDetailsPage = () => {
               No parking slots found matching the selected vehicle filter.
             </div>
           ) : (
-            slotsAvailability.map((s) => {
+            slotsAvailability.map((s, idx) => {
               const isSlotOpen = s.available;
+              const slotKey = s.id || s.slotId || `slot-${idx}-${s.slotNumber}`;
               return (
                 <div
-                  key={s.slotId}
+                  key={slotKey}
                   onClick={() => isSlotOpen && openBookingModalWithSlot(s)}
                   style={{
                     padding: '0.85rem',
@@ -491,6 +511,7 @@ const ParkingLotDetailsPage = () => {
       {/* 5-Step Booking Reservation Modal */}
       {isModalOpen && (
         <BookingModal
+          isOpen={isModalOpen}
           lot={lot}
           initialSlot={selectedSlotForBooking}
           initialStartTime={startTime}

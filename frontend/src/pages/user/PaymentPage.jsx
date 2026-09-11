@@ -266,7 +266,7 @@ const PaymentPage = () => {
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            <ShieldCheck size={18} flexShrink={0} />
+            <ShieldCheck size={18} style={{ flexShrink: 0 }} />
             <span>Prototype Sandbox Mode: Simulated instant settlement. No real bank charges.</span>
           </div>
 

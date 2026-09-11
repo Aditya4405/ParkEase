@@ -181,7 +181,7 @@ const UserDashboard = () => {
       </div>
 
       {/* Next Upcoming Booking Card */}
-      {stats?.nextBooking && (
+      {stats?.nextBooking && stats.nextBooking.id && (
         <div style={{
           background: '#ffffff',
           borderRadius: '16px',
