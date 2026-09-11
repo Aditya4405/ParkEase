@@ -6,6 +6,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // Layouts
 import PublicLayout from './components/layout/PublicLayout';
 import UserLayout from './components/layout/UserLayout';
+import PartnerApplicationLayout from './components/layout/PartnerApplicationLayout';
 import OwnerLayout from './components/layout/OwnerLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import AdaptiveParkingLayout from './components/layout/AdaptiveParkingLayout';
@@ -15,10 +16,15 @@ import LandingPage from './pages/public/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import OwnerRegisterPage from './pages/auth/OwnerRegisterPage';
+import OwnerApplicationPage from './pages/public/OwnerApplicationPage';
 import ParkingLotsPage from './pages/user/ParkingLotsPage';
 import ParkingLotDetailsPage from './pages/user/ParkingLotDetailsPage';
 import ReservationPage from './pages/user/ReservationPage';
 import ParkingTicketPage from './pages/user/ParkingTicketPage';
+
+// Partner Applicant Pages
+import PartnerDashboard from './pages/partner/PartnerDashboard';
+import PartnerApplicationStatusPage from './pages/partner/PartnerApplicationStatusPage';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -41,6 +47,8 @@ import OwnerProfilePage from './pages/owner/OwnerProfilePage';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminOwnerApplicationsPage from './pages/admin/AdminOwnerApplicationsPage';
+import AdminOwnerApplicationDetailsPage from './pages/admin/AdminOwnerApplicationDetailsPage';
 import AdminOwnersPage from './pages/admin/AdminOwnersPage';
 import AdminParkingPage from './pages/admin/AdminParkingPage';
 import AdminSlotsPage from './pages/admin/AdminSlotsPage';
@@ -61,9 +69,44 @@ function App() {
           <Route path="/parking-lots/:id" element={<AdaptiveParkingLayout pageTitle="Parking Details"><ParkingLotDetailsPage /></AdaptiveParkingLayout>} />
           <Route path="/parking-lots/:id/reserve" element={<AdaptiveParkingLayout pageTitle="Reserve Parking"><ReservationPage /></AdaptiveParkingLayout>} />
           <Route path="/bookings/:id/ticket" element={<AdaptiveParkingLayout pageTitle="Digital Parking Pass"><ParkingTicketPage /></AdaptiveParkingLayout>} />
+          <Route path="/owner/apply" element={<AdaptiveParkingLayout pageTitle="Become a Partner" partnerMode={true}><OwnerApplicationPage /></AdaptiveParkingLayout>} />
+          <Route path="/partner/apply" element={<AdaptiveParkingLayout pageTitle="Become a Partner" partnerMode={true}><OwnerApplicationPage /></AdaptiveParkingLayout>} />
+          <Route path="/owner-registration" element={<Navigate to="/owner/apply" replace />} />
+          <Route path="/register-owner" element={<Navigate to="/owner/apply" replace />} />
           <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
           <Route path="/register" element={<PublicLayout><RegisterPage /></PublicLayout>} />
-          <Route path="/register-owner" element={<PublicLayout><OwnerRegisterPage /></PublicLayout>} />
+
+          {/* ================= PARTNER APPLICANT AUTHENTICATED ROUTES ================= */}
+          <Route
+            path="/partner/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
+                <PartnerApplicationLayout pageTitle="Partner Applicant Dashboard">
+                  <PartnerDashboard />
+                </PartnerApplicationLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/status"
+            element={
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
+                <PartnerApplicationLayout pageTitle="Application Status & Timeline">
+                  <PartnerApplicationStatusPage />
+                </PartnerApplicationLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/application"
+            element={
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
+                <PartnerApplicationLayout pageTitle="Application Status & Timeline">
+                  <PartnerApplicationStatusPage />
+                </PartnerApplicationLayout>
+              </ProtectedRoute>
+            }
+          />
 
           {/* ================= USER AUTHENTICATED ROUTES ================= */}
           <Route
@@ -283,6 +326,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminLayout><AdminUsersPage /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/owner-applications"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminLayout><AdminOwnerApplicationsPage /></AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/owner-applications/:id"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminLayout><AdminOwnerApplicationDetailsPage /></AdminLayout>
               </ProtectedRoute>
             }
           />

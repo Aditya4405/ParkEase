@@ -32,6 +32,7 @@ public class AdminService {
     private final ParkingSlotRepository parkingSlotRepository;
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
+    private final com.parkease.user.repository.OwnerApplicationRepository ownerApplicationRepository;
 
     public Map<String, Object> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -44,6 +45,7 @@ public class AdminService {
         long availableSlots = parkingSlotRepository.countByActiveTrueAndIsAvailableTrue();
         long totalBookings = bookingRepository.count();
         Double totalRevenue = paymentRepository.calculateTotalSystemRevenue();
+        long pendingOwnerApplications = ownerApplicationRepository.countByStatus(com.parkease.user.entity.OwnerApplicationStatus.PENDING);
 
         stats.put("totalUsers", totalUsers);
         stats.put("totalOwners", totalOwners);
@@ -53,6 +55,7 @@ public class AdminService {
         stats.put("availableSlots", availableSlots);
         stats.put("totalBookings", totalBookings);
         stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0.0);
+        stats.put("pendingOwnerApplications", pendingOwnerApplications);
 
         // Recent bookings preview
         List<BookingResponse> recentBookings = bookingRepository.findAll().stream()

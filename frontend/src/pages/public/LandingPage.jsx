@@ -758,7 +758,7 @@ const LandingPage = () => {
               </div>
 
               <Link 
-                to="/register-owner" 
+                to="/owner/apply" 
                 className="btn btn-primary" 
                 style={{ 
                   padding: '0.85rem 1.8rem', 

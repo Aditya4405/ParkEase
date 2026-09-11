@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/authApi';
-import { User, Mail, Lock, Phone, Car, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, Phone, Car, ArrowRight, Building2, ShieldCheck } from 'lucide-react';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
@@ -19,6 +19,13 @@ const RegisterPage = () => {
 
   const { saveAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const isFromOwnerApplication = 
+    queryParams.get('from') === 'owner-application' || 
+    location.state?.from === '/owner/apply' ||
+    (typeof location.state?.from === 'string' && location.state.from.includes('owner'));
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,7 +40,13 @@ const RegisterPage = () => {
       const response = await authApi.registerUser(formData);
       const { token, ...userData } = response.data;
       saveAuth(token, userData);
-      navigate('/dashboard', { replace: true });
+
+      const from = location.state?.from?.pathname || (typeof location.state?.from === 'string' ? location.state.from : null) || (isFromOwnerApplication ? '/owner/apply' : null);
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err);
     } finally {
@@ -55,7 +68,9 @@ const RegisterPage = () => {
             width: '48px',
             height: '48px',
             borderRadius: '14px',
-            background: 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
+            background: isFromOwnerApplication 
+              ? 'linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)' 
+              : 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -63,14 +78,21 @@ const RegisterPage = () => {
             margin: '0 auto 1rem',
             boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
           }}>
-            <Car size={26} />
+            {isFromOwnerApplication ? <Building2 size={26} /> : <User size={26} />}
           </div>
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-            <span className="badge badge-primary" style={{ fontSize: '0.7rem' }}>🇮🇳 India Free Registration</span>
+            <span className={isFromOwnerApplication ? "badge badge-primary" : "badge badge-primary"} style={{ fontSize: '0.72rem' }}>
+              {isFromOwnerApplication ? '🏢 Parking Partner Registration' : '🇮🇳 Free Registration'}
+            </span>
           </div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Create Driver Account</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.25rem' }}>
-            Instant access to reserve parking spaces in Lucknow & across India
+
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Create Your ParkEase Account</h2>
+          
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.25rem', lineHeight: '1.5' }}>
+            {isFromOwnerApplication
+              ? 'Create your account to securely submit and track your Parking Partner application.'
+              : 'Create a free account to find, reserve and manage parking bookings across India.'}
           </p>
         </div>
 
@@ -78,14 +100,14 @@ const RegisterPage = () => {
 
         <form onSubmit={handleRegister}>
           <div className="form-group">
-            <label className="form-label">Full Name</label>
+            <label className="form-label">Full Name *</label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
               <input
                 type="text"
                 name="name"
                 className="form-input"
-                placeholder="e.g. Amit Verma"
+                placeholder={isFromOwnerApplication ? "e.g. Rajesh Sharma" : "e.g. Amit Verma"}
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -95,14 +117,14 @@ const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address *</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
               <input
                 type="email"
                 name="email"
                 className="form-input"
-                placeholder="amit.verma@example.com"
+                placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -112,7 +134,7 @@ const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password (min 6 characters)</label>
+            <label className="form-label">Password (min 6 characters) *</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
               <input
@@ -131,7 +153,7 @@ const RegisterPage = () => {
 
           <div className="grid-2">
             <div className="form-group">
-              <label className="form-label">Phone (India)</label>
+              <label className="form-label">Phone Number *</label>
               <div style={{ position: 'relative' }}>
                 <Phone size={18} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
                 <input
@@ -148,7 +170,7 @@ const RegisterPage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Vehicle Plate</label>
+              <label className="form-label">Vehicle Plate (Optional)</label>
               <div style={{ position: 'relative' }}>
                 <Car size={18} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
                 <input
@@ -172,7 +194,7 @@ const RegisterPage = () => {
           >
             {loading ? <LoadingSpinner text="Creating Account..." /> : (
               <>
-                <span>Create Driver Account</span>
+                <span>{isFromOwnerApplication ? 'Create Account & Continue Application' : 'Create Account'}</span>
                 <ArrowRight size={17} />
               </>
             )}
@@ -181,12 +203,21 @@ const RegisterPage = () => {
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
           Already registered?{' '}
-          <Link to="/login" style={{ fontWeight: 600 }}>Log in</Link>
-          <div style={{ marginTop: '0.35rem' }}>
-            <Link to="/register-owner" style={{ fontSize: '0.82rem', color: 'var(--primary)' }}>
-              Are you a parking lot owner? Register here →
-            </Link>
-          </div>
+          <Link 
+            to={isFromOwnerApplication ? "/login?from=owner-application" : "/login"} 
+            state={isFromOwnerApplication ? { from: '/owner/apply' } : undefined}
+            style={{ fontWeight: 600 }}
+          >
+            Log in
+          </Link>
+          
+          {!isFromOwnerApplication && (
+            <div style={{ marginTop: '0.35rem' }}>
+              <Link to="/owner/apply" style={{ fontSize: '0.82rem', color: 'var(--primary)' }}>
+                Own a parking facility? Become a Parking Partner →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

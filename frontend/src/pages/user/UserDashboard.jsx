@@ -17,15 +17,19 @@ import {
   QrCode
 } from 'lucide-react';
 
+import { ownerApplicationApi } from '../../api/ownerApplicationApi';
+
 const UserDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [partnerApp, setPartnerApp] = useState(null);
 
   useEffect(() => {
     fetchDashboardStats();
+    fetchPartnerApplication();
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -39,6 +43,18 @@ const UserDashboard = () => {
       setError('Unable to load latest dashboard telemetry. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPartnerApplication = async () => {
+    try {
+      const res = await ownerApplicationApi.getMyApplication();
+      if (res && res.data) {
+        setPartnerApp(res.data);
+      }
+    } catch {
+      // 204 or error
+      setPartnerApp(null);
     }
   };
 
@@ -124,6 +140,70 @@ const UserDashboard = () => {
           </Link>
         </div>
       </div>
+
+      {/* Parking Partner Status / Invitation Banner */}
+      {partnerApp && (
+        <div style={{
+          background: partnerApp.status === 'APPROVED' ? '#ecfdf5' : partnerApp.status === 'REJECTED' ? '#fef2f2' : '#eff6ff',
+          border: `1px solid ${partnerApp.status === 'APPROVED' ? '#a7f3d0' : partnerApp.status === 'REJECTED' ? '#fecaca' : '#bfdbfe'}`,
+          borderRadius: '16px',
+          padding: '1.25rem 1.5rem',
+          marginBottom: '2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: partnerApp.status === 'APPROVED' ? '#059669' : partnerApp.status === 'REJECTED' ? '#dc2626' : '#2563eb',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {partnerApp.status === 'APPROVED' ? <CheckCircle size={22} /> : partnerApp.status === 'REJECTED' ? <AlertCircle size={22} /> : <Clock size={22} />}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <strong style={{
+                  fontSize: '0.95rem',
+                  color: partnerApp.status === 'APPROVED' ? '#065f46' : partnerApp.status === 'REJECTED' ? '#991b1b' : '#1e40af'
+                }}>
+                  {partnerApp.status === 'APPROVED' ? 'Partner Application Approved!' : partnerApp.status === 'REJECTED' ? 'Partner Application Requires Attention' : 'Parking Partner Application Under Review'}
+                </strong>
+                <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', background: 'rgba(0,0,0,0.06)', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                  {partnerApp.applicationNumber}
+                </span>
+              </div>
+              <span style={{
+                fontSize: '0.82rem',
+                color: partnerApp.status === 'APPROVED' ? '#047857' : partnerApp.status === 'REJECTED' ? '#b91c1c' : '#3b82f6'
+              }}>
+                {partnerApp.status === 'APPROVED' ? 'Your parking facility verification is complete. You can now manage parking lots.' : partnerApp.status === 'REJECTED' ? `Note: "${partnerApp.reviewNotes || 'Verification incomplete.'}"` : 'Our administration is currently verifying your facility specifications.'}
+              </span>
+            </div>
+          </div>
+
+          <Link
+            to={partnerApp.status === 'APPROVED' ? '/owner/dashboard' : '/partner/dashboard'}
+            className="btn btn-primary"
+            style={{
+              padding: '0.55rem 1.1rem',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              background: partnerApp.status === 'APPROVED' ? '#059669' : partnerApp.status === 'REJECTED' ? '#dc2626' : '#2563eb',
+              borderColor: partnerApp.status === 'APPROVED' ? '#059669' : partnerApp.status === 'REJECTED' ? '#dc2626' : '#2563eb',
+            }}
+          >
+            {partnerApp.status === 'APPROVED' ? 'Open Operator Hub →' : 'View Partner Dashboard →'}
+          </Link>
+        </div>
+      )}
 
       {error && (
         <div className="alert alert-danger" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

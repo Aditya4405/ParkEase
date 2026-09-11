@@ -82,8 +82,8 @@ const OwnerLayout = ({ children }) => {
             <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
               ParkEase <span style={{ color: '#38bdf8' }}>Owner</span>
             </div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Facility Management
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              OWNER PORTAL
             </span>
           </div>
         </div>

@@ -77,8 +77,79 @@ const AdminDashboard = () => {
 
       <ErrorMessage error={error} onDismiss={() => setError(null)} />
 
+      {/* Pending Partner Applications Alert Banner */}
+      {(stats?.pendingOwnerApplications > 0) && (
+        <div style={{
+          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          border: '1px solid #fde68a',
+          borderRadius: '16px',
+          padding: '1.25rem 1.5rem',
+          marginBottom: '1.75rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '10px',
+              background: '#f59e0b',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 900
+            }}>
+              <Briefcase size={22} />
+            </div>
+            <div>
+              <strong style={{ fontSize: '1rem', color: '#92400e', display: 'block' }}>
+                {stats.pendingOwnerApplications} Partner Application{stats.pendingOwnerApplications > 1 ? 's' : ''} Awaiting Verification
+              </strong>
+              <span style={{ fontSize: '0.84rem', color: '#b45309' }}>
+                New facility operators have submitted their ownership & facility specs for review.
+              </span>
+            </div>
+          </div>
+          <Link
+            to="/admin/owner-applications"
+            className="btn btn-primary"
+            style={{
+              background: '#d97706',
+              borderColor: '#d97706',
+              padding: '0.6rem 1.25rem',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}
+          >
+            <span>Review Applications</span>
+            <ArrowRight size={15} />
+          </Link>
+        </div>
+      )}
+
       {/* Metrics Row 1 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #f59e0b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Partner Applications</span>
+            <Briefcase size={20} color="#f59e0b" />
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#92400e' }}>
+            {stats?.pendingOwnerApplications || 0}
+          </div>
+          <Link to="/admin/owner-applications" style={{ fontSize: '0.78rem', color: '#d97706', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
+            <span>Review pipeline</span> <ArrowRight size={12} />
+          </Link>
+        </div>
+
         <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4f46e5' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Registered Drivers</span>

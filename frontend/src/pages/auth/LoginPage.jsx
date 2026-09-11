@@ -26,8 +26,11 @@ const LoginPage = () => {
       const { token, ...userData } = response.data;
       saveAuth(token, userData);
 
-      // Redirect based on role
-      const from = location.state?.from?.pathname;
+      // Redirect based on return state, query param, or role
+      const queryParams = new URLSearchParams(location.search);
+      const isFromOwnerApp = queryParams.get('from') === 'owner-application';
+      const from = location.state?.from?.pathname || (typeof location.state?.from === 'string' ? location.state.from : null) || (isFromOwnerApp ? '/owner/apply' : null);
+      
       if (from) {
         navigate(from, { replace: true });
       } else if (userData.role === 'ADMIN') {
@@ -76,7 +79,7 @@ const LoginPage = () => {
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Welcome Back</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.25rem' }}>
-            Log in to manage or book your parking slots
+            Log in to manage your account and bookings
           </p>
         </div>
 
@@ -147,7 +150,7 @@ const LoginPage = () => {
               className="btn btn-secondary btn-sm"
               style={{ fontSize: '0.78rem', padding: '0.35rem' }}
             >
-              <User size={13} /> Driver
+              <User size={13} /> User
             </button>
             <button
               type="button"
@@ -171,10 +174,10 @@ const LoginPage = () => {
         {/* Sign Up Links */}
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ fontWeight: 600 }}>Sign up as driver</Link>
+          <Link to="/register" style={{ fontWeight: 600 }}>Create account</Link>
           <div style={{ marginTop: '0.35rem' }}>
-            <Link to="/register-owner" style={{ fontSize: '0.82rem', color: 'var(--primary)' }}>
-              Register as Parking Lot Owner →
+            <Link to="/owner/apply" style={{ fontSize: '0.82rem', color: 'var(--primary)' }}>
+              Own a parking facility? Become a Parking Partner →
             </Link>
           </div>
         </div>

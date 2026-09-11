@@ -4,9 +4,10 @@ import UserLayout from './UserLayout';
 import OwnerLayout from './OwnerLayout';
 import AdminLayout from './AdminLayout';
 import PublicLayout from './PublicLayout';
+import PartnerApplicationLayout from './PartnerApplicationLayout';
 
-const AdaptiveParkingLayout = ({ children, pageTitle }) => {
-  const { user, isAuthenticated, loading } = useAuth();
+const AdaptiveParkingLayout = ({ children, pageTitle, partnerMode = false }) => {
+  const { user, isAuthenticated, portalMode, loading } = useAuth();
 
   if (loading) {
     return (
@@ -17,11 +18,14 @@ const AdaptiveParkingLayout = ({ children, pageTitle }) => {
   }
 
   if (isAuthenticated) {
+    if (user?.role === 'ADMIN') {
+      return <AdminLayout>{children}</AdminLayout>;
+    }
     if (user?.role === 'OWNER') {
       return <OwnerLayout>{children}</OwnerLayout>;
     }
-    if (user?.role === 'ADMIN') {
-      return <AdminLayout>{children}</AdminLayout>;
+    if (partnerMode || portalMode === 'PARTNER') {
+      return <PartnerApplicationLayout pageTitle={pageTitle}>{children}</PartnerApplicationLayout>;
     }
     return <UserLayout pageTitle={pageTitle}>{children}</UserLayout>;
   }
