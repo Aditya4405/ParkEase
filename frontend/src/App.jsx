@@ -17,6 +17,8 @@ import RegisterPage from './pages/auth/RegisterPage';
 import OwnerRegisterPage from './pages/auth/OwnerRegisterPage';
 import ParkingLotsPage from './pages/user/ParkingLotsPage';
 import ParkingLotDetailsPage from './pages/user/ParkingLotDetailsPage';
+import ReservationPage from './pages/user/ReservationPage';
+import ParkingTicketPage from './pages/user/ParkingTicketPage';
 
 // User Pages
 import UserDashboard from './pages/user/UserDashboard';
@@ -57,6 +59,8 @@ function App() {
           <Route path="/find-parking" element={<AdaptiveParkingLayout pageTitle="Find Parking"><ParkingLotsPage /></AdaptiveParkingLayout>} />
           <Route path="/parking-lots" element={<AdaptiveParkingLayout pageTitle="Find Parking"><ParkingLotsPage /></AdaptiveParkingLayout>} />
           <Route path="/parking-lots/:id" element={<AdaptiveParkingLayout pageTitle="Parking Details"><ParkingLotDetailsPage /></AdaptiveParkingLayout>} />
+          <Route path="/parking-lots/:id/reserve" element={<AdaptiveParkingLayout pageTitle="Reserve Parking"><ReservationPage /></AdaptiveParkingLayout>} />
+          <Route path="/bookings/:id/ticket" element={<AdaptiveParkingLayout pageTitle="Digital Parking Pass"><ParkingTicketPage /></AdaptiveParkingLayout>} />
           <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
           <Route path="/register" element={<PublicLayout><RegisterPage /></PublicLayout>} />
           <Route path="/register-owner" element={<PublicLayout><OwnerRegisterPage /></PublicLayout>} />
@@ -95,6 +99,14 @@ function App() {
             }
           />
           <Route
+            path="/user/parking/:id/reserve"
+            element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserLayout pageTitle="Reserve Parking"><ReservationPage /></UserLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/my-bookings"
             element={
               <ProtectedRoute allowedRoles={['USER']}>
@@ -123,6 +135,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'OWNER']}>
                 <UserLayout><BookingDetailsPage /></UserLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/bookings/:id/ticket"
+            element={
+              <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'OWNER']}>
+                <UserLayout pageTitle="Digital Parking Pass"><ParkingTicketPage /></UserLayout>
               </ProtectedRoute>
             }
           />
