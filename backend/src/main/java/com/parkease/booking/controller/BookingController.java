@@ -96,4 +96,10 @@ public class BookingController {
     ) {
         return ResponseEntity.ok(bookingService.getAvailableSlots(lotId, vehicleType, startTime, endTime));
     }
+
+    @GetMapping("/verify/{id}")
+    @Operation(summary = "Verify digital booking ticket pass by ID (Public QR Pass Verification)")
+    public ResponseEntity<BookingResponse> verifyBooking(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.getBookingVerification(id));
+    }
 }

@@ -149,4 +149,25 @@ public class BookingConflictTest {
         BookingResponse cancelled = bookingService.cancelBooking(booking.getId(), testUser);
         assertEquals(BookingStatus.CANCELLED, cancelled.getStatus());
     }
+
+    @Test
+    @DisplayName("Should verify digital booking ticket pass successfully")
+    void testVerifyBookingPass() {
+        LocalDateTime baseTime = LocalDateTime.now().plusDays(4).withHour(16).withMinute(0).withSecond(0);
+
+        BookingRequest bookingReq = BookingRequest.builder()
+                .parkingLotId(testLot.getId())
+                .parkingSlotId(testLot.getSlots().get(0).getId())
+                .vehicleType(VehicleType.CAR)
+                .startTime(baseTime)
+                .endTime(baseTime.plusHours(2))
+                .build();
+
+        BookingResponse booking = bookingService.createBooking(bookingReq, testUser);
+        BookingResponse verified = bookingService.getBookingVerification(booking.getId());
+
+        assertNotNull(verified);
+        assertEquals(booking.getId(), verified.getId());
+        assertEquals(testLot.getName(), verified.getParkingLotName());
+    }
 }

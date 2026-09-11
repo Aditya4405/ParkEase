@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/parking-lots", "/api/v1/parking-lots/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/parking-slots/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*/available-slots").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/verify/**").permitAll()
 
                         // Owner & Admin write endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/parking-lots/**").hasAnyRole("OWNER", "ADMIN")

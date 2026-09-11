@@ -172,6 +172,12 @@ public class BookingService {
         return mapToBookingResponse(booking);
     }
 
+    public BookingResponse getBookingVerification(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking pass not found with id: " + id));
+        return mapToBookingResponse(booking);
+    }
+
     @Transactional
     public BookingResponse cancelBooking(Long bookingId, User currentUser) {
         Booking booking = bookingRepository.findById(bookingId)

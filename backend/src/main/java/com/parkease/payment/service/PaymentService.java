@@ -51,7 +51,8 @@ public class PaymentService {
             return mapToResponse(existingPayment.get());
         }
 
-        String txnId = "TXN-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String datePrefix = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String txnId = "PE-DEMO-" + datePrefix + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         
         Payment payment = existingPayment.orElseGet(() -> Payment.builder()
                 .booking(booking)

@@ -127,7 +127,7 @@ public class PaymentServiceTest {
         assertEquals(PaymentStatus.SUCCESS, response.getStatus());
         assertEquals(100.0, response.getAmount()); // 2 hours * 50.0 = 100.0
         assertNotNull(response.getTransactionId());
-        assertTrue(response.getTransactionId().startsWith("TXN-"));
+        assertTrue(response.getTransactionId().startsWith("PE-DEMO-") || response.getTransactionId().startsWith("TXN-"));
     }
 
     @Test
