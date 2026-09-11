@@ -42,7 +42,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllUsersWithFilter(role, search));
     }
 
-    @PatchMapping("/users/{id}/toggle-status")
+    @RequestMapping(value = "/users/{id}/toggle-status", method = {RequestMethod.PATCH, RequestMethod.PUT})
     @Operation(summary = "Block or activate a user account")
     public ResponseEntity<UserResponse> toggleUserStatus(@PathVariable Long id) {
         return ResponseEntity.ok(adminService.toggleUserStatus(id));
@@ -60,7 +60,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllParkingLots());
     }
 
-    @PatchMapping("/parking-lots/{id}/toggle-status")
+    @RequestMapping(value = "/parking-lots/{id}/toggle-status", method = {RequestMethod.PATCH, RequestMethod.PUT})
     @Operation(summary = "Activate or deactivate a parking facility")
     public ResponseEntity<ParkingLotResponse> toggleParkingLotStatus(@PathVariable Long id) {
         return ResponseEntity.ok(adminService.toggleParkingLotStatus(id));

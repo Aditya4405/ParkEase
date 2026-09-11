@@ -118,12 +118,12 @@ const AdminParkingPage = () => {
                   </td>
                   <td style={{ padding: '0.85rem 1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{l.totalSlots || 0}</span>
+                      <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{l.totalSlots || l.totalCapacity || 0}</span>
                       <span style={{ fontSize: '0.78rem', color: '#64748b' }}>({l.availableSlots || 0} free)</span>
                     </div>
                   </td>
                   <td style={{ padding: '0.85rem 1rem' }}>
-                    {l.evCharging && (
+                    {(l.hasEVCharging || l.evCharging) && (
                       <span className="badge badge-success" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
                         <Zap size={11} /> EV Ready
                       </span>

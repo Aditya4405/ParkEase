@@ -31,8 +31,7 @@ const AdminSlotsPage = () => {
   const filteredSlots = slots.filter((s) => {
     const matchSearch =
       s.slotNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      s.parkingLotName?.toLowerCase().includes(search.toLowerCase()) ||
-      s.city?.toLowerCase().includes(search.toLowerCase());
+      s.parkingLotName?.toLowerCase().includes(search.toLowerCase());
     const matchVehicle = vehicleFilter === 'ALL' || s.vehicleType?.toUpperCase() === vehicleFilter;
     return matchSearch && matchVehicle;
   });
@@ -66,7 +65,7 @@ const AdminSlotsPage = () => {
           <input
             type="text"
             className="form-input"
-            placeholder="Search bay number, facility name, city..."
+            placeholder="Search bay number, facility name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ paddingLeft: '2.2rem' }}
@@ -91,39 +90,46 @@ const AdminSlotsPage = () => {
               <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                 <th style={{ padding: '0.85rem 1rem' }}>Slot Number</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Parking Facility</th>
-                <th style={{ padding: '0.85rem 1rem' }}>Location</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Size</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Vehicle Type</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Tariff (₹/hr)</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSlots.map((s) => (
-                <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span style={{ fontWeight: 800, color: 'var(--primary)', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
-                      {s.slotNumber}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#0f172a' }}>
-                    {s.parkingLotName}
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>
-                    {s.city}
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: '#334155' }}>
-                    {s.vehicleType}
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: 800, color: '#0f172a' }}>
-                    ₹{s.pricePerHour}
-                  </td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span className={`badge ${s.status === 'AVAILABLE' ? 'badge-success' : s.status === 'OCCUPIED' ? 'badge-warning' : 'badge-neutral'}`}>
-                      {s.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {filteredSlots.map((s) => {
+                const isAvail = s.isAvailable !== undefined ? s.isAvailable : s.status === 'AVAILABLE';
+                const isActive = s.active !== undefined ? s.active : true;
+                const statusLabel = !isActive ? 'INACTIVE' : isAvail ? 'AVAILABLE' : 'OCCUPIED';
+                const statusBadge = !isActive ? 'badge-neutral' : isAvail ? 'badge-success' : 'badge-warning';
+
+                return (
+                  <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      <span style={{ fontWeight: 800, color: 'var(--primary)', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+                        {s.slotNumber}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#0f172a' }}>
+                      {s.parkingLotName || `Facility #${s.parkingLotId || '-'}`}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>
+                      {s.size || 'STANDARD'}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: '#334155' }}>
+                      {s.vehicleType}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: 800, color: '#0f172a' }}>
+                      ₹{s.price ?? s.pricePerHour ?? 0}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      <span className={`badge ${statusBadge}`}>
+                        {statusLabel}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

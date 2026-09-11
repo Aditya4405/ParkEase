@@ -151,17 +151,34 @@ public class AdminService {
 
     public Map<String, Object> getSystemAnalytics() {
         Map<String, Object> analytics = new HashMap<>();
+        long totalParkingLots = parkingLotRepository.count();
+        long totalSlots = parkingSlotRepository.count();
+
         analytics.put("totalRevenue", paymentRepository.calculateTotalSystemRevenue());
         analytics.put("totalBookings", bookingRepository.count());
         analytics.put("totalUsers", userRepository.countByRole(Role.USER));
         analytics.put("totalOwners", userRepository.countByRole(Role.OWNER));
-        analytics.put("totalLots", parkingLotRepository.count());
-        analytics.put("totalSlots", parkingSlotRepository.count());
+        analytics.put("totalLots", totalParkingLots);
+        analytics.put("totalParkingLots", totalParkingLots);
+        analytics.put("totalSlots", totalSlots);
+
+        // City distribution breakdown
+        Map<String, Long> cityCount = parkingLotRepository.findAll().stream()
+                .filter(p -> p.getCity() != null && !p.getCity().isBlank())
+                .collect(Collectors.groupingBy(ParkingLot::getCity, Collectors.counting()));
+        analytics.put("cityBreakdown", cityCount);
+
+        // Vehicle distribution breakdown
+        Map<String, Long> vehicleCount = parkingSlotRepository.findAll().stream()
+                .filter(s -> s.getVehicleType() != null)
+                .collect(Collectors.groupingBy(s -> s.getVehicleType().name(), Collectors.counting()));
+        analytics.put("vehicleBreakdown", vehicleCount);
 
         // Category breakdown
         Map<String, Long> categoryCount = parkingLotRepository.findAll().stream()
                 .collect(Collectors.groupingBy(p -> p.getCategory() != null ? p.getCategory() : "OTHER", Collectors.counting()));
         analytics.put("lotsByCategory", categoryCount);
+        analytics.put("categoryBreakdown", categoryCount);
 
         return analytics;
     }
