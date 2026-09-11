@@ -144,7 +144,7 @@ const ParkingLotCard = ({ lot }) => {
 
         {/* Address */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#64748b', fontSize: '0.86rem', marginBottom: '0.65rem' }}>
-          <MapPin size={14} color="var(--primary)" flexShrink={0} />
+          <MapPin size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {lot.address}, <strong style={{ color: '#334155' }}>{lot.city}</strong> {lot.pincode ? `(${lot.pincode})` : ''}
           </span>
